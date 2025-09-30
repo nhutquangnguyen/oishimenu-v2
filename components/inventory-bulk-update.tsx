@@ -15,7 +15,7 @@ export function InventoryBulkUpdate() {
         </p>
 
         <div className="flex gap-4">
-          <button className="flex items-center gap-2 rounded-lg border border-grab-green bg-white px-6 py-3 text-sm font-medium text-grab-green hover:bg-green-50">
+          <button className="flex items-center gap-2 rounded-lg border border-purple-600 bg-white px-6 py-3 text-sm font-medium text-purple-600 hover:bg-purple-50">
             <Edit className="h-4 w-4" />
             Edit inventory in bulk
           </button>

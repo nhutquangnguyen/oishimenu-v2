@@ -86,8 +86,8 @@ export function InventoryOptionGroups() {
               onClick={() => setSelectedGroup(group.id)}
               className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors ${
                 selectedGroup === group.id
-                  ? "border-grab-green bg-green-50"
-                  : "border-gray-200 hover:bg-gray-50"
+                  ? "border-purple-600 bg-purple-50"
+                  : "border-gray-200 hover:bg-purple-50"
               }`}
             >
               <span className="text-sm font-medium text-gray-900">{group.name}</span>

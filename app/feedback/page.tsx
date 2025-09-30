@@ -25,13 +25,13 @@ export default function FeedbackPage() {
           <TabsList className="mb-6 border-b bg-transparent p-0">
             <TabsTrigger
               value="ratings"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-grab-green data-[state=active]:text-grab-green data-[state=active]:shadow-none"
+              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
               Ratings and reviews
             </TabsTrigger>
             <TabsTrigger
               value="incidents"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-grab-green data-[state=active]:text-grab-green data-[state=active]:shadow-none"
+              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
               Incidents
             </TabsTrigger>

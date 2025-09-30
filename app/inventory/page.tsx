@@ -21,19 +21,19 @@ export default function InventoryPage() {
           <TabsList className="border-b bg-transparent p-0">
             <TabsTrigger
               value="items"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-grab-green data-[state=active]:text-grab-green data-[state=active]:shadow-none"
+              className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
               ITEMS
             </TabsTrigger>
             <TabsTrigger
               value="option-groups"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-grab-green data-[state=active]:text-grab-green data-[state=active]:shadow-none"
+              className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
               OPTION GROUPS
             </TabsTrigger>
             <TabsTrigger
               value="bulk-update"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-grab-green data-[state=active]:text-grab-green data-[state=active]:shadow-none"
+              className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
               BULK UPDATE
             </TabsTrigger>

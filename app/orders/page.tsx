@@ -24,7 +24,7 @@ export default function OrdersPage() {
           <div className="relative">
             <button
               onClick={() => setShowStatusSelector(true)}
-              className="flex items-center gap-2 rounded-lg bg-grab-green px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
+              className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2 text-sm font-medium text-white hover:from-indigo-600 hover:to-purple-700 shadow-md"
             >
               Normal
               <ChevronDown className="h-4 w-4" />
@@ -37,25 +37,25 @@ export default function OrdersPage() {
             <TabsList className="border-b bg-transparent p-0">
               <TabsTrigger
                 value="preparing"
-                className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-grab-green data-[state=active]:text-grab-green data-[state=active]:shadow-none"
+                className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
               >
                 Preparing
               </TabsTrigger>
               <TabsTrigger
                 value="ready"
-                className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-grab-green data-[state=active]:text-grab-green data-[state=active]:shadow-none"
+                className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
               >
                 Ready
               </TabsTrigger>
               <TabsTrigger
                 value="upcoming"
-                className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-grab-green data-[state=active]:text-grab-green data-[state=active]:shadow-none"
+                className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
               >
                 Upcoming
               </TabsTrigger>
               <TabsTrigger
                 value="history"
-                className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-grab-green data-[state=active]:text-grab-green data-[state=active]:shadow-none"
+                className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
               >
                 History
               </TabsTrigger>
@@ -66,8 +66,8 @@ export default function OrdersPage() {
                 onClick={() => setViewMode("grid")}
                 className={`rounded-lg border p-2 ${
                   viewMode === "grid"
-                    ? "border-grab-green bg-grab-green text-white"
-                    : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                    ? "border-purple-600 bg-purple-600 text-white"
+                    : "border-gray-300 text-gray-600 hover:bg-purple-50"
                 }`}
               >
                 <Grid className="h-4 w-4" />
@@ -76,8 +76,8 @@ export default function OrdersPage() {
                 onClick={() => setViewMode("list")}
                 className={`rounded-lg border p-2 ${
                   viewMode === "list"
-                    ? "border-grab-green bg-grab-green text-white"
-                    : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                    ? "border-purple-600 bg-purple-600 text-white"
+                    : "border-gray-300 text-gray-600 hover:bg-purple-50"
                 }`}
               >
                 <List className="h-4 w-4" />

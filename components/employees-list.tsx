@@ -70,7 +70,7 @@ export function EmployeesList({ onSelectEmployee, onAddEmployee }: EmployeesList
         </div>
         <button
           onClick={onAddEmployee}
-          className="flex items-center gap-2 rounded-lg bg-grab-green px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
+          className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2 text-sm font-medium text-white hover:from-indigo-600 hover:to-purple-700 shadow-md"
         >
           <Plus className="h-4 w-4" />
           Add Employee

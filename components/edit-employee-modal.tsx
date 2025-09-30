@@ -151,7 +151,7 @@ export function EditEmployeeModal({ employee, isOpen, onClose }: EditEmployeeMod
           </button>
           <button
             onClick={handleSave}
-            className="rounded-lg bg-grab-green px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
+            className="rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2 text-sm font-medium text-white hover:from-indigo-600 hover:to-purple-700 shadow-md"
           >
             Save Changes
           </button>

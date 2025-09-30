@@ -71,7 +71,7 @@ export function StoreStatusSelector({ isOpen, onClose }: StoreStatusSelectorProp
 
         <button
           onClick={handleConfirm}
-          className="mt-6 w-full rounded-lg bg-grab-green py-3 text-white font-medium hover:bg-green-600"
+          className="mt-6 w-full rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 py-3 text-white font-medium hover:from-indigo-600 hover:to-purple-700 shadow-md"
         >
           Confirm
         </button>

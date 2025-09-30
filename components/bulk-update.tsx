@@ -15,7 +15,7 @@ export function BulkUpdate() {
         </p>
 
         <div className="flex gap-4">
-          <button className="flex items-center gap-2 rounded-lg border border-grab-green bg-grab-green px-6 py-3 text-sm font-medium text-white hover:bg-green-600">
+          <button className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-3 text-sm font-medium text-white hover:from-indigo-600 hover:to-purple-700 shadow-md">
             <Plus className="h-4 w-4" />
             Add items in bulk
           </button>

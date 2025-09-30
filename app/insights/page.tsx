@@ -48,31 +48,31 @@ export default function InsightsPage() {
           <TabsList className="mb-6 border-b bg-transparent p-0">
             <TabsTrigger
               value="sales"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-grab-green data-[state=active]:text-grab-green data-[state=active]:shadow-none"
+              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
               Sales
             </TabsTrigger>
             <TabsTrigger
               value="menu"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-grab-green data-[state=active]:text-grab-green data-[state=active]:shadow-none"
+              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
               Menu
             </TabsTrigger>
             <TabsTrigger
               value="customers"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-grab-green data-[state=active]:text-grab-green data-[state=active]:shadow-none"
+              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
               Customers
             </TabsTrigger>
             <TabsTrigger
               value="operations"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-grab-green data-[state=active]:text-grab-green data-[state=active]:shadow-none"
+              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
               Operations
             </TabsTrigger>
             <TabsTrigger
               value="offers"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-grab-green data-[state=active]:text-grab-green data-[state=active]:shadow-none"
+              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
               Offers
             </TabsTrigger>
