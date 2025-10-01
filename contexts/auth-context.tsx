@@ -38,6 +38,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Fetch user data from Firestore
   const fetchUserData = async (uid: string) => {
+    if (!db) {
+      console.warn('Database not available, skipping user data fetch')
+      return
+    }
+
     try {
       const userDoc = await getDoc(doc(db, 'users', uid))
       if (userDoc.exists()) {
@@ -50,6 +55,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Create user document in Firestore
   const createUserDocument = async (user: User) => {
+    if (!db) {
+      console.warn('Database not available, setting mock user data')
+      // Set fallback user data when database is not available
+      setUserData({
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName || '',
+        photoURL: user.photoURL || '',
+        role: 'merchant',
+        provider: 'google'
+      })
+      return
+    }
+
     try {
       const userRef = doc(db, 'users', user.uid)
       const userDoc = await getDoc(userRef)
@@ -75,6 +94,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Sign in with Google (handles both login and signup)
   const signInWithGoogle = async () => {
+    if (!auth) {
+      console.warn('Auth not available, using mock authentication')
+      // Mock authentication when Firebase is disabled
+      const mockUser = {
+        uid: 'mock-user-123',
+        email: 'demo@oishimenu.com',
+        displayName: 'Demo User',
+        photoURL: null
+      } as User
+
+      setUser(mockUser)
+      await createUserDocument(mockUser)
+      router.push('/dashboard')
+      return
+    }
+
     try {
       const provider = new GoogleAuthProvider()
       // Add additional scopes if needed
@@ -93,7 +128,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Logout
   const logout = async () => {
     try {
-      await signOut(auth)
+      if (auth) {
+        await signOut(auth)
+      }
       setUser(null)
       setUserData(null)
       router.push('/')
@@ -122,6 +159,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Monitor auth state changes
   useEffect(() => {
+    if (!auth) {
+      console.warn('Auth not available, setting loading to false')
+      setLoading(false)
+      return
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user)
       if (user) {
