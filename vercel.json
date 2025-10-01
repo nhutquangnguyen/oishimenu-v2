@@ -1,20 +1,8 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "domains": [
-    "oishimenu.com",
-    "www.oishimenu.com",
-    "merchant.oishimenu.com"
-  ],
   "redirects": [
     {
-      "source": "https://www.oishimenu.com/(.*)",
-      "destination": "https://oishimenu.com/$1",
+      "source": "/www/(.*)",
+      "destination": "/$1",
       "permanent": true
     }
   ],
