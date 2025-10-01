@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select"
 import { getMenuCategories, getMenuItems, getMockMenuData } from "@/lib/services/menu"
 import type { MenuItem as FirebaseMenuItem, MenuCategory } from "@/lib/types/menu"
+import { AddMenuItemModal } from "./add-menu-item-modal"
 
 interface DisplayMenuItem {
   id: string
@@ -43,6 +44,7 @@ export function MenuOverview() {
   const [error, setError] = useState<string | null>(null)
   const [filterAvailability, setFilterAvailability] = useState("all-schedules")
   const [filterStatus, setFilterStatus] = useState("all-items")
+  const [showAddModal, setShowAddModal] = useState(false)
 
   useEffect(() => {
     loadMenuData()
@@ -152,10 +154,12 @@ export function MenuOverview() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button className="flex items-center gap-2 rounded-lg border border-grab-green bg-grab-green px-4 py-2 text-sm font-medium text-white hover:bg-green-600">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 rounded-lg border border-purple-600 bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
+          >
             <Plus className="h-4 w-4" />
-            Add new
-            <ChevronDown className="h-4 w-4" />
+            Add new item
           </button>
 
           <Select value={filterAvailability} onValueChange={setFilterAvailability}>
@@ -282,6 +286,22 @@ export function MenuOverview() {
           onClose={() => setSelectedItem(null)}
         />
       )}
+
+      <AddMenuItemModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={() => {
+          loadMenuData() // Refresh the data after successful addition
+        }}
+        categories={[
+          ...categories.map(c => c.name),
+          "Cà Phê - Coffee",
+          "Trà Sữa",
+          "Trà - Tea",
+          "Matcha",
+          "Đồ Ăn Nhanh"
+        ].filter((category, index, arr) => arr.indexOf(category) === index)} // Remove duplicates
+      />
     </div>
   )
 }
