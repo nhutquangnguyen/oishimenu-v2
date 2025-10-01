@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Plus, Search, ChevronDown, MoreHorizontal } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Plus, Search, ChevronDown, MoreHorizontal, Loader2 } from "lucide-react"
 import { EditItemModal } from "./edit-item-modal"
 import {
   Select,
@@ -10,92 +10,143 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { getMenuCategories, getMenuItems, getMockMenuData } from "@/lib/services/menu"
+import type { MenuItem as FirebaseMenuItem, MenuCategory } from "@/lib/types/menu"
 
-interface MenuItem {
+interface DisplayMenuItem {
   id: string
   name: string
   price: string
   image: string
+  firebaseData: FirebaseMenuItem
 }
 
-interface Category {
+interface DisplayCategory {
   name: string
   count: number
-  items: MenuItem[]
+  items: DisplayMenuItem[]
 }
 
-const categories: Category[] = [
-  {
-    name: "Combo năng lượng",
-    count: 3,
-    items: [
-      {
-        id: "1",
-        name: "Combo Matcha Latte (M) + Cà phê sữa (M)",
-        price: "48.000đ",
-        image: "/api/placeholder/60/60"
-      }
-    ]
-  },
-  {
-    name: "Combo Trà Chiều",
-    count: 3,
-    items: [
-      {
-        id: "2",
-        name: "Combo Cà phê sữa tươi sương sáo (M) + Bánh mì que",
-        price: "47.000đ",
-        image: "/api/placeholder/60/60"
-      }
-    ]
-  },
-  {
-    name: "MÓN MỚI",
-    count: 3,
-    items: [
-      {
-        id: "3",
-        name: "Combo Matcha Latte (M) + Bánh mì que",
-        price: "44.000đ",
-        image: "/api/placeholder/60/60"
-      }
-    ]
-  },
-  {
-    name: "ƯU ĐÃI HÔM NAY",
-    count: 4,
-    items: []
-  },
-  {
-    name: "MATCHA",
-    count: 8,
-    items: []
-  },
-  {
-    name: "ẨM THỰC- XỬ DỪA",
-    count: 4,
-    items: []
-  },
-  {
-    name: "CÀ PHÊ- COFFEE",
-    count: 9,
-    items: []
-  },
-  {
-    name: "Ban Dừng Thêm Bánh Mì Nhé😊",
-    count: 1,
-    items: []
-  },
-  {
-    name: "ICE BLEND",
-    count: 4,
-    items: []
-  }
-]
+function formatPrice(price: number): string {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    minimumFractionDigits: 0,
+  }).format(price).replace('₫', 'đ');
+}
 
 export function MenuOverview() {
-  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
+  const [selectedItem, setSelectedItem] = useState<DisplayMenuItem | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
+  const [categories, setCategories] = useState<DisplayCategory[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [filterAvailability, setFilterAvailability] = useState("all-schedules")
+  const [filterStatus, setFilterStatus] = useState("all-items")
+
+  useEffect(() => {
+    loadMenuData()
+  }, [filterAvailability, filterStatus])
+
+  async function loadMenuData() {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Try to fetch from Firebase first
+      const [firebaseCategories, firebaseItems] = await Promise.all([
+        getMenuCategories(),
+        getMenuItems({
+          availableOnly: filterStatus === 'available',
+          sortBy: 'name',
+          sortOrder: 'asc'
+        })
+      ])
+
+      // If no data from Firebase, use mock data
+      if (firebaseCategories.length === 0 && firebaseItems.length === 0) {
+        console.log('No Firebase data found, using mock data')
+        const mockData = getMockMenuData()
+        const displayCategories = transformToDisplayFormat(mockData.categories, mockData.items)
+        setCategories(displayCategories)
+      } else {
+        const displayCategories = transformToDisplayFormat(firebaseCategories, firebaseItems)
+        setCategories(displayCategories)
+      }
+    } catch (err) {
+      console.error('Error loading menu data:', err)
+      setError('Failed to load menu data')
+
+      // Fallback to mock data on error
+      const mockData = getMockMenuData()
+      const displayCategories = transformToDisplayFormat(mockData.categories, mockData.items)
+      setCategories(displayCategories)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function transformToDisplayFormat(categories: MenuCategory[], items: FirebaseMenuItem[]): DisplayCategory[] {
+    return categories.map(category => {
+      const categoryItems = items
+        .filter(item => item.categoryName === category.name)
+        .filter(item => {
+          if (filterStatus === 'available') return item.availableStatus === 'AVAILABLE'
+          if (filterStatus === 'unavailable') return item.availableStatus !== 'AVAILABLE'
+          return true
+        })
+        .filter(item => {
+          if (!searchTerm) return true
+          return item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                 item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+        })
+        .map(item => ({
+          id: item.id,
+          name: item.name,
+          price: formatPrice(item.price),
+          image: item.photos[0] || "/api/placeholder/60/60",
+          firebaseData: item
+        }))
+
+      return {
+        name: category.name,
+        count: categoryItems.length,
+        items: categoryItems
+      }
+    })
+  }
+
+  const filteredCategories = categories.filter(category => {
+    if (!searchTerm) return true
+    return category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           category.items.some(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  })
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+        <span className="ml-2 text-gray-600">Loading menu data...</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-lg bg-red-50 p-4">
+        <div className="text-red-800">
+          <h3 className="font-medium">Error loading menu</h3>
+          <p className="text-sm mt-1">{error}</p>
+          <button
+            onClick={loadMenuData}
+            className="mt-2 rounded bg-red-100 px-3 py-1 text-sm font-medium text-red-800 hover:bg-red-200"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -107,7 +158,7 @@ export function MenuOverview() {
             <ChevronDown className="h-4 w-4" />
           </button>
 
-          <Select defaultValue="all-schedules">
+          <Select value={filterAvailability} onValueChange={setFilterAvailability}>
             <SelectTrigger className="w-48">
               <SelectValue />
             </SelectTrigger>
@@ -118,7 +169,7 @@ export function MenuOverview() {
             </SelectContent>
           </Select>
 
-          <Select defaultValue="all-items">
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
             <SelectTrigger className="w-48">
               <SelectValue />
             </SelectTrigger>
@@ -152,7 +203,7 @@ export function MenuOverview() {
           </div>
 
           <div className="space-y-2">
-            {categories.map((category) => (
+            {filteredCategories.map((category) => (
               <div
                 key={category.name}
                 className="flex items-center justify-between rounded-lg p-3 hover:bg-gray-50 cursor-pointer"
@@ -173,7 +224,7 @@ export function MenuOverview() {
           </div>
 
           <div className="space-y-4">
-            {categories.flatMap(category => category.items).map((item) => (
+            {filteredCategories.flatMap(category => category.items).map((item) => (
               <div
                 key={item.id}
                 onClick={() => setSelectedItem(item)}
@@ -181,17 +232,45 @@ export function MenuOverview() {
               >
                 <div className="h-15 w-15 rounded-lg bg-gray-100 flex items-center justify-center">
                   <img
-                    src="/api/placeholder/60/60"
+                    src={item.image}
                     alt={item.name}
                     className="h-12 w-12 rounded-lg object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/api/placeholder/60/60"
+                    }}
                   />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium text-gray-900">{item.name}</h3>
                   <p className="text-sm text-gray-600">{item.price}</p>
+                  {item.firebaseData.description && (
+                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                      {item.firebaseData.description}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                      item.firebaseData.availableStatus === 'AVAILABLE'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {item.firebaseData.availableStatus === 'AVAILABLE' ? 'Available' : 'Unavailable'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {item.firebaseData.categoryName}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
+            {filteredCategories.every(category => category.items.length === 0) && (
+              <div className="text-center py-8 text-gray-500">
+                <p>No menu items found</p>
+                {searchTerm && (
+                  <p className="text-sm mt-1">Try adjusting your search or filters</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
