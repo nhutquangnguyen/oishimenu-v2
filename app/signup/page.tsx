@@ -64,7 +64,7 @@ export default function SignupPage() {
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-600" />
-                <span>Tích hợp GrabFood, Shopee Food</span>
+                <span>Tích hợp OishiDelivery, Shopee Food</span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-600" />

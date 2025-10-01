@@ -156,12 +156,12 @@ export function POSOrderSummary({
           <div className="flex items-center gap-2 bg-white rounded-lg border px-3 py-2">
             <Image
               src="/grabfood-logo.png"
-              alt="GrabFood"
+              alt="OishiDelivery"
               width={80}
               height={24}
               className="object-contain"
             />
-            <span className="text-xs text-gray-600">Grab food</span>
+            <span className="text-xs text-gray-600">Oishi delivery</span>
           </div>
         </div>
 

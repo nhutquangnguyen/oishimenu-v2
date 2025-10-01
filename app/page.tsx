@@ -117,7 +117,7 @@ export default function LandingPage() {
           <div className="flex items-center justify-center gap-12 opacity-60">
             <div className="flex items-center gap-2 text-2xl font-bold text-green-600">
               <div className="w-8 h-8 bg-green-500 rounded-full"></div>
-              GrabFood
+              OishiDelivery
             </div>
             <div className="flex items-center gap-2 text-2xl font-bold text-orange-600">
               <div className="w-8 h-8 bg-orange-500 rounded-full"></div>
@@ -185,7 +185,7 @@ export default function LandingPage() {
               <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-500" />
-                  Tích hợp GrabFood, Shopee Food
+                  Tích hợp OishiDelivery, Shopee Food
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-500" />

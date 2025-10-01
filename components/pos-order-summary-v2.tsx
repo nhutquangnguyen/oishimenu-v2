@@ -322,9 +322,9 @@ export function POSOrderSummaryV2({
               className="p-4 border-2 rounded-lg hover:border-purple-600 hover:bg-purple-50 transition-colors"
             >
               <div className="h-6 w-16 mx-auto mb-2 bg-green-500 rounded flex items-center justify-center">
-                <span className="text-xs font-bold text-white">GRAB</span>
+                <span className="text-xs font-bold text-white">OISHI</span>
               </div>
-              <p className="text-sm font-medium">GrabFood</p>
+              <p className="text-sm font-medium">OishiDelivery</p>
             </button>
 
             <button

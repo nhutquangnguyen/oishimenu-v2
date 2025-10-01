@@ -91,7 +91,7 @@ Vercel automatically provisions SSL certificates for all domains.
 - ✅ Vietnamese language content
 - ✅ SME F&B focused features
 - ✅ Local pricing (Vietnamese Dong)
-- ✅ Integration showcases (GrabFood, Shopee Food)
+- ✅ Integration showcases (OishiDelivery, Shopee Food)
 - ✅ Customer testimonials
 - ✅ Free trial signup
 - ✅ Mobile responsive design

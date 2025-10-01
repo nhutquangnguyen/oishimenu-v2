@@ -55,9 +55,9 @@ export default function FeedbackPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="grabfood">GrabFood</SelectItem>
-                  <SelectItem value="grabmart">GrabMart</SelectItem>
-                  <SelectItem value="grabexpress">GrabExpress</SelectItem>
+                  <SelectItem value="oishidelivery">OishiDelivery</SelectItem>
+                  <SelectItem value="oishimart">OishiMart</SelectItem>
+                  <SelectItem value="oishiexpress">OishiExpress</SelectItem>
                 </SelectContent>
               </Select>
 

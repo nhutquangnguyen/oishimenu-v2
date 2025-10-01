@@ -26,7 +26,7 @@ export default function DashboardPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all-services">Tất cả dịch vụ</SelectItem>
-                <SelectItem value="grabfood">GrabFood</SelectItem>
+                <SelectItem value="oishidelivery">OishiDelivery</SelectItem>
                 <SelectItem value="shopeefood">ShopeeFood</SelectItem>
                 <SelectItem value="gomafood">GomaFood</SelectItem>
               </SelectContent>
@@ -199,7 +199,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <h3 className="font-semibold">tinh_nang</h3>
-              <p className="text-sm opacity-90">Khám phá hành trình GrabAcademy với nhiều cấp nhật mới</p>
+              <p className="text-sm opacity-90">Khám phá hành trình OishiAcademy với nhiều cấp nhật mới</p>
             </div>
           </div>
         </div>

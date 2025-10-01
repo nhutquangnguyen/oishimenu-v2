@@ -92,9 +92,9 @@ export default function InsightsPage() {
                   <SelectValue placeholder="Select service" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Grab services</SelectItem>
-                  <SelectItem value="food">GrabFood</SelectItem>
-                  <SelectItem value="mart">GrabMart</SelectItem>
+                  <SelectItem value="all">All OishiMenu services</SelectItem>
+                  <SelectItem value="food">OishiDelivery</SelectItem>
+                  <SelectItem value="mart">OishiMart</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -131,9 +131,9 @@ export default function InsightsPage() {
                   <SelectValue placeholder="Select service" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Grab services</SelectItem>
-                  <SelectItem value="food">GrabFood</SelectItem>
-                  <SelectItem value="mart">GrabMart</SelectItem>
+                  <SelectItem value="all">All OishiMenu services</SelectItem>
+                  <SelectItem value="food">OishiDelivery</SelectItem>
+                  <SelectItem value="mart">OishiMart</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -168,9 +168,9 @@ export default function InsightsPage() {
                   <SelectValue placeholder="Select service" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Grab services</SelectItem>
-                  <SelectItem value="food">GrabFood</SelectItem>
-                  <SelectItem value="mart">GrabMart</SelectItem>
+                  <SelectItem value="all">All OishiMenu services</SelectItem>
+                  <SelectItem value="food">OishiDelivery</SelectItem>
+                  <SelectItem value="mart">OishiMart</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -207,9 +207,9 @@ export default function InsightsPage() {
                   <SelectValue placeholder="Select service" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Grab services</SelectItem>
-                  <SelectItem value="food">GrabFood</SelectItem>
-                  <SelectItem value="mart">GrabMart</SelectItem>
+                  <SelectItem value="all">All OishiMenu services</SelectItem>
+                  <SelectItem value="food">OishiDelivery</SelectItem>
+                  <SelectItem value="mart">OishiMart</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -246,9 +246,9 @@ export default function InsightsPage() {
                   <SelectValue placeholder="Select service" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Grab services</SelectItem>
-                  <SelectItem value="food">GrabFood</SelectItem>
-                  <SelectItem value="mart">GrabMart</SelectItem>
+                  <SelectItem value="all">All OishiMenu services</SelectItem>
+                  <SelectItem value="food">OishiDelivery</SelectItem>
+                  <SelectItem value="mart">OishiMart</SelectItem>
                 </SelectContent>
               </Select>
 

@@ -6,7 +6,7 @@ export function OffersOverview() {
       <div className="mb-4">
         <h2 className="text-lg font-semibold text-gray-900">Offers overview</h2>
         <p className="text-sm text-gray-600">
-          Offers-attributed sales insights, excluding Grab-funded offers, ads, and campaign packages.
+          Offers-attributed sales insights, excluding OishiMenu-funded offers, ads, and campaign packages.
         </p>
       </div>
 
@@ -45,7 +45,7 @@ export function OffersOverview() {
           <div>
             <p className="text-sm font-medium text-gray-900">Net sales</p>
             <p className="mt-1 text-sm text-gray-600">
-              The total sales from transactions with 1 or more offers applied. This is after deducting merchant-funded discounts, delivery charges, and GrabPay refunds.
+              The total sales from transactions with 1 or more offers applied. This is after deducting merchant-funded discounts, delivery charges, and OishiPay refunds.
             </p>
           </div>
         </div>

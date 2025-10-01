@@ -333,7 +333,7 @@ export function POSOrderSummaryV3({
                 <span className="text-sm font-medium text-purple-700 capitalize">
                   {orderSource === "dine-in" ? "Dine In" :
                    orderSource === "takeaway" ? "Takeaway" :
-                   orderSource === "grab" ? "GrabFood" : "ShopeeFood"}
+                   orderSource === "grab" ? "OishiDelivery" : "ShopeeFood"}
                 </span>
               </div>
             </div>
@@ -361,9 +361,9 @@ export function POSOrderSummaryV3({
                 className="p-3 border-2 rounded-lg hover:border-purple-600 hover:bg-purple-50 transition-colors"
               >
                 <div className="h-5 w-12 mx-auto mb-1 bg-green-500 rounded flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">GRAB</span>
+                  <span className="text-xs font-bold text-white">OISHI</span>
                 </div>
-                <p className="text-xs font-medium">GrabFood</p>
+                <p className="text-xs font-medium">OishiDelivery</p>
               </button>
 
               <button
