@@ -17,9 +17,10 @@ import {
   Settings,
   ShoppingCart,
 } from "lucide-react"
+import { UserProfile } from "./user-profile"
 
 const navigation = [
-  { name: "Home", href: "/", icon: Home },
+  { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Insights", href: "/insights", icon: TrendingUp },
   { name: "Orders", href: "/orders", icon: ShoppingBag },
   { name: "POS", href: "/pos", icon: ShoppingCart },
@@ -75,8 +76,8 @@ export function Sidebar() {
         </button>
       </div>
 
-      <div className="flex items-center gap-3 border-t p-4">
-        <Settings className="h-5 w-5 text-gray-400" />
+      <div className="border-t p-4">
+        <UserProfile />
       </div>
     </div>
   )

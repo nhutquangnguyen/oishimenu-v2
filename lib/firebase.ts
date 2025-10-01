@@ -1,7 +1,7 @@
 import { initializeApp, getApps } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
-import { getStorage } from 'firebase/storage'
+import { getAuth, connectAuthEmulator } from 'firebase/auth'
+import { getFirestore, connectFirestoreEmulator, initializeFirestore, CACHE_SIZE_UNLIMITED } from 'firebase/firestore'
+import { getStorage as getFirebaseStorage, connectStorageEmulator } from 'firebase/storage'
 import { getAnalytics, isSupported } from 'firebase/analytics'
 
 const firebaseConfig = {
@@ -14,17 +14,107 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 }
 
-// Initialize Firebase only if it hasn't been initialized yet
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+// Check if Firebase is disabled
+const isFirebaseDisabled = process.env.NEXT_PUBLIC_FIREBASE_DISABLED === 'true'
 
-// Initialize Firebase services
-export const auth = getAuth(app)
-export const db = getFirestore(app)
-export const storage = getStorage(app)
+// Validate Firebase configuration
+const isValidConfig = !isFirebaseDisabled && Object.values(firebaseConfig).every(value =>
+  value !== undefined && value !== null && value !== ''
+)
+
+if (isFirebaseDisabled) {
+  console.log('Firebase is disabled - running in development mode')
+} else if (!isValidConfig) {
+  console.warn('Firebase configuration is incomplete. Some features may not work.')
+}
+
+// Initialize Firebase only if it hasn't been initialized yet and Firebase is not disabled
+let app: any = null
+if (!isFirebaseDisabled && isValidConfig) {
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+} else {
+  // Create a mock app for development
+  app = null
+}
+
+// Initialize Firebase services - only if app is available
+export const auth = app ? getAuth(app) : null
+
+// Initialize Firestore with optimized settings - LAZY LOADED
+let firestoreInstance: ReturnType<typeof getFirestore> | null = null
+export const getDb = () => {
+  // Return null immediately if Firebase is disabled or app is null
+  if (isFirebaseDisabled || !app) {
+    return null
+  }
+
+  if (!firestoreInstance && isValidConfig) {
+    try {
+      firestoreInstance = initializeFirestore(app, {
+        cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+        experimentalForceLongPolling: true, // Force long polling to avoid WebChannel issues
+      })
+
+      // Connect to emulator if needed
+      if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
+        try {
+          connectFirestoreEmulator(firestoreInstance, 'localhost', 8080)
+        } catch (error) {
+          console.log('Firestore emulator already connected')
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to initialize Firestore:', error)
+      try {
+        // If already initialized, just get it
+        firestoreInstance = getFirestore(app)
+      } catch (fallbackError) {
+        console.error('Firestore completely unavailable:', fallbackError)
+        return null
+      }
+    }
+  }
+  return firestoreInstance
+}
+
+// Export db - will be initialized on first use
+export const db = getDb()
+
+let storageInstance: ReturnType<typeof getFirebaseStorage> | null = null
+export const getStorageInstance = () => {
+  if (isFirebaseDisabled || !app) {
+    return null
+  }
+
+  if (!storageInstance) {
+    storageInstance = getFirebaseStorage(app)
+
+    // Connect to emulator if needed
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
+      try {
+        connectStorageEmulator(storageInstance, 'localhost', 9199)
+      } catch (error) {
+        console.log('Storage emulator already connected')
+      }
+    }
+  }
+  return storageInstance
+}
+
+export const storage = getStorageInstance()
+
+// Connect auth to emulator if needed
+if (!isFirebaseDisabled && auth && typeof window !== 'undefined' && process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
+  try {
+    connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true })
+  } catch (error) {
+    console.log('Auth emulator already connected')
+  }
+}
 
 // Initialize Analytics only on client side and if supported
 export const initAnalytics = async () => {
-  if (typeof window !== 'undefined' && await isSupported()) {
+  if (!isFirebaseDisabled && app && typeof window !== 'undefined' && await isSupported()) {
     return getAnalytics(app)
   }
   return null

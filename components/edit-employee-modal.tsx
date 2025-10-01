@@ -130,7 +130,7 @@ export function EditEmployeeModal({ employee, isOpen, onClose }: EditEmployeeMod
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Status
             </label>
-            <Select value={status} onValueChange={setStatus}>
+            <Select value={status} onValueChange={(value) => setStatus(value as "Active" | "Inactive")}>
               <SelectTrigger className="w-40">
                 <SelectValue />
               </SelectTrigger>

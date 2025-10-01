@@ -1,9 +1,9 @@
 "use client"
 
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { CustomerRatings } from "@/components/customer-ratings"
-import { CustomerReviews } from "@/components/customer-reviews"
-import { IncidentsTab } from "@/components/incidents-tab"
+// import { CustomerRatings } from "@/components/customer-ratings"
+// import { CustomerReviews } from "@/components/customer-reviews"
+// import { IncidentsTab } from "@/components/incidents-tab"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import {
   Select,
@@ -83,13 +83,19 @@ export default function FeedbackPage() {
               </Select>
             </div>
 
-            <CustomerRatings />
+            <div className="bg-white p-6 rounded-lg shadow-sm border">
+              <p className="text-gray-500">Customer ratings component will load here</p>
+            </div>
 
-            <CustomerReviews />
+            <div className="bg-white p-6 rounded-lg shadow-sm border">
+              <p className="text-gray-500">Customer reviews component will load here</p>
+            </div>
           </TabsContent>
 
           <TabsContent value="incidents" className="space-y-6">
-            <IncidentsTab />
+            <div className="bg-white p-6 rounded-lg shadow-sm border">
+              <p className="text-gray-500">Incidents tab component will load here</p>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
