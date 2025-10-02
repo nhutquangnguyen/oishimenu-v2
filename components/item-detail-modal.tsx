@@ -353,17 +353,17 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="relative w-full max-w-2xl max-h-[90vh] bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="w-full max-w-2xl max-h-[95vh] bg-white rounded-lg shadow-xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between border-b p-4 bg-gray-50">
+        <div className="flex items-center justify-between p-4 border-b bg-gray-50 rounded-t-lg flex-shrink-0">
           <h2 className="text-lg font-semibold text-gray-900">
-            {isEditing ? 'Edit Item' : 'Item Details'}
+            {isEditing ? 'EDIT ITEM' : 'ITEM DETAILS'}
           </h2>
           <div className="flex items-center gap-2">
             {!isEditing && (
               <button
                 onClick={handleEdit}
-                className="p-2 rounded-lg hover:bg-gray-200 text-gray-600"
+                className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
                 title="Edit item"
               >
                 <Edit3 className="h-4 w-4" />
@@ -371,16 +371,16 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
             )}
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-200 text-gray-600"
+              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
             >
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5 text-gray-600" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-8rem)]">
-          <div className="p-6 space-y-6">
+        <div className="overflow-y-auto flex-1">
+          <div className="p-4 space-y-4">
             {error && (
               <div className="rounded-lg bg-red-50 p-3">
                 <p className="text-sm text-red-700">{error}</p>
@@ -411,13 +411,13 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">NAME</label>
                 {isEditing ? (
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
                     disabled={loading}
                   />
                 ) : (
@@ -426,13 +426,13 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">PRICE</label>
                 {isEditing ? (
                   <input
                     type="number"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
                     disabled={loading}
                   />
                 ) : (
@@ -444,17 +444,17 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
             {/* Category and Status */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">CATEGORY</label>
                 <p className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{item.categoryName}</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">STATUS</label>
                 {isEditing ? (
                   <select
                     value={formData.availableStatus}
                     onChange={(e) => setFormData({ ...formData, availableStatus: e.target.value as MenuItem['availableStatus'] })}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
                     disabled={loading}
                   >
                     <option value="AVAILABLE">Available</option>
@@ -471,13 +471,13 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <label className="block text-sm font-medium text-gray-900 mb-2">DESCRIPTION</label>
               {isEditing ? (
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
                   placeholder="Enter item description"
                   disabled={loading}
                 />
@@ -688,13 +688,13 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
 
             {/* Availability Schedule */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Availability Schedule</label>
+              <label className="block text-sm font-medium text-gray-900 mb-2">AVAILABILITY SCHEDULE</label>
               {isEditing ? (
                 <input
                   type="text"
                   value={formData.availabilitySchedule}
                   onChange={(e) => setFormData({ ...formData, availabilitySchedule: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
                   placeholder="e.g., Weekdays only, 9AM-6PM"
                   disabled={loading}
                 />
@@ -797,24 +797,23 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
         </div>
 
         {/* Footer */}
-        <div className="border-t p-4 bg-gray-50">
-          <div className="flex gap-3 justify-end">
+        <div className="border-t p-4 bg-gray-50 rounded-b-lg flex-shrink-0">
+          <div className="flex justify-end gap-3">
             {isEditing ? (
               <>
                 <button
                   onClick={handleCancel}
                   disabled={loading}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                  className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={loading}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                  className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Save className="h-4 w-4" />
-                  {loading ? "Saving..." : "Save Changes"}
+                  {loading ? 'Saving...' : 'Save Changes'}
                 </button>
               </>
             ) : (
@@ -822,7 +821,7 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
                 <button
                   onClick={handleDelete}
                   disabled={loading}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50 disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50 disabled:opacity-50"
                 >
                   <Trash2 className="h-4 w-4" />
                   Delete
@@ -830,7 +829,7 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
                 <button
                   onClick={handleEdit}
                   disabled={loading}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
                   <Edit3 className="h-4 w-4" />
                   Edit Item
