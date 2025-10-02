@@ -12,7 +12,8 @@ import {
   limit as firestoreLimit
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { MenuItem, MenuCategory, MenuFilter } from '@/lib/types/menu';
+import type { MenuItem, MenuCategory, MenuFilter, OptionGroup, MenuOption } from '@/lib/types/menu';
+import { calculateRecipeCost } from '@/lib/services/inventory';
 
 /**
  * Fetch all menu categories
@@ -302,6 +303,130 @@ export async function updateCategoryOrders(categories: Array<{id: string, displa
   } catch (error) {
     console.error('Error updating category orders:', error);
     return false;
+  }
+}
+
+/**
+ * Calculate the cost of a single menu option including its recipe
+ */
+export async function calculateOptionCost(option: MenuOption): Promise<number> {
+  try {
+    if (option.recipe) {
+      return await calculateRecipeCost(option.recipe);
+    }
+    return 0;
+  } catch (error) {
+    console.error('Error calculating option cost:', error);
+    return 0;
+  }
+}
+
+/**
+ * Calculate the total cost of an option group (all options combined)
+ */
+export async function calculateOptionGroupCost(optionGroup: OptionGroup): Promise<number> {
+  try {
+    let totalCost = 0;
+    for (const option of optionGroup.options) {
+      const optionCost = await calculateOptionCost(option);
+      totalCost += optionCost;
+    }
+    return totalCost;
+  } catch (error) {
+    console.error('Error calculating option group cost:', error);
+    return 0;
+  }
+}
+
+/**
+ * Calculate the total cost of a menu item including its base recipe and all option recipes
+ */
+export async function calculateMenuItemTotalCost(menuItem: MenuItem): Promise<{
+  baseCost: number;
+  optionCosts: { [optionGroupName: string]: number };
+  totalCost: number;
+}> {
+  try {
+    let baseCost = 0;
+
+    // Calculate base cost from menu item recipe(s)
+    if (menuItem.sizes && menuItem.sizes.length > 0) {
+      // For items with multiple sizes, calculate average cost or use default size
+      const defaultSize = menuItem.sizes.find(size => size.size === menuItem.defaultSize) || menuItem.sizes[0];
+      if (defaultSize?.recipe) {
+        baseCost = await calculateRecipeCost(defaultSize.recipe);
+      }
+    } else if (menuItem.recipe) {
+      // Legacy single recipe
+      baseCost = await calculateRecipeCost(menuItem.recipe);
+    }
+
+    // Calculate option costs
+    const optionCosts: { [optionGroupName: string]: number } = {};
+    let totalOptionCost = 0;
+
+    if (menuItem.optionGroups) {
+      for (const optionGroup of menuItem.optionGroups) {
+        const groupCost = await calculateOptionGroupCost(optionGroup);
+        optionCosts[optionGroup.name] = groupCost;
+        totalOptionCost += groupCost;
+      }
+    }
+
+    return {
+      baseCost,
+      optionCosts,
+      totalCost: baseCost + totalOptionCost
+    };
+  } catch (error) {
+    console.error('Error calculating menu item total cost:', error);
+    return {
+      baseCost: 0,
+      optionCosts: {},
+      totalCost: 0
+    };
+  }
+}
+
+/**
+ * Calculate the cost for a specific menu item configuration (specific size + selected options)
+ */
+export async function calculateMenuItemConfigurationCost(
+  menuItem: MenuItem,
+  sizeOption?: string,
+  selectedOptions?: { [optionGroupName: string]: string[] }
+): Promise<number> {
+  try {
+    let totalCost = 0;
+
+    // Calculate base cost for selected size
+    if (menuItem.sizes && menuItem.sizes.length > 0) {
+      const selectedSize = menuItem.sizes.find(size => size.size === sizeOption) || menuItem.sizes[0];
+      if (selectedSize?.recipe) {
+        totalCost += await calculateRecipeCost(selectedSize.recipe);
+      }
+    } else if (menuItem.recipe) {
+      // Legacy single recipe
+      totalCost += await calculateRecipeCost(menuItem.recipe);
+    }
+
+    // Calculate cost for selected options
+    if (selectedOptions && menuItem.optionGroups) {
+      for (const optionGroup of menuItem.optionGroups) {
+        const selectedOptionNames = selectedOptions[optionGroup.name] || [];
+        for (const optionName of selectedOptionNames) {
+          const option = optionGroup.options.find(opt => opt.name === optionName);
+          if (option) {
+            totalCost += await calculateOptionCost(option);
+          }
+        }
+      }
+    }
+
+    return totalCost;
+  } catch (error) {
+    console.error('Error calculating menu item configuration cost:', error);
+    return 0;
   }
 }
 

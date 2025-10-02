@@ -9,6 +9,7 @@ interface RecipeEditorProps {
   recipe?: Recipe | null
   onSave: (recipe: Recipe) => void
   onCancel: () => void
+  hideButtons?: boolean
 }
 
 function formatPrice(price: number): string {
@@ -19,7 +20,7 @@ function formatPrice(price: number): string {
   }).format(price).replace('₫', 'đ');
 }
 
-export function RecipeEditor({ recipe, onSave, onCancel }: RecipeEditorProps) {
+export function RecipeEditor({ recipe, onSave, onCancel, hideButtons = false }: RecipeEditorProps) {
   const [ingredients, setIngredients] = useState<Ingredient[]>([])
   const [formData, setFormData] = useState<Recipe>({
     id: recipe?.id || `recipe-${Date.now()}`,
@@ -42,6 +43,13 @@ export function RecipeEditor({ recipe, onSave, onCancel }: RecipeEditorProps) {
   useEffect(() => {
     calculateCost()
   }, [formData.ingredients])
+
+  // Auto-save changes when hideButtons is true
+  useEffect(() => {
+    if (hideButtons) {
+      onSave(formData)
+    }
+  }, [formData, hideButtons, onSave])
 
   const loadIngredients = async () => {
     try {
@@ -294,44 +302,46 @@ export function RecipeEditor({ recipe, onSave, onCancel }: RecipeEditorProps) {
       </div>
 
       {/* Actions */}
-      <div className="pt-4 border-t">
-        {/* Validation messages */}
-        {(!formData.name || formData.ingredients.length === 0 ||
-          formData.ingredients.some(ingredient => !ingredient.ingredientId || ingredient.ingredientId.trim() === '')) && (
-          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800 font-medium mb-1">Recipe validation:</p>
-            <ul className="text-xs text-yellow-700 space-y-1">
-              {!formData.name && <li>• Recipe name is required</li>}
-              {formData.ingredients.length === 0 && <li>• At least one ingredient is required</li>}
-              {formData.ingredients.some(ingredient => !ingredient.ingredientId || ingredient.ingredientId.trim() === '') && (
-                <li>• All ingredients must be selected (highlighted in red)</li>
-              )}
-            </ul>
-          </div>
-        )}
+      {!hideButtons && (
+        <div className="pt-4 border-t">
+          {/* Validation messages */}
+          {(!formData.name || formData.ingredients.length === 0 ||
+            formData.ingredients.some(ingredient => !ingredient.ingredientId || ingredient.ingredientId.trim() === '')) && (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+              <p className="text-sm text-yellow-800 font-medium mb-1">Recipe validation:</p>
+              <ul className="text-xs text-yellow-700 space-y-1">
+                {!formData.name && <li>• Recipe name is required</li>}
+                {formData.ingredients.length === 0 && <li>• At least one ingredient is required</li>}
+                {formData.ingredients.some(ingredient => !ingredient.ingredientId || ingredient.ingredientId.trim() === '') && (
+                  <li>• All ingredients must be selected (highlighted in red)</li>
+                )}
+              </ul>
+            </div>
+          )}
 
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={
-              loading ||
-              !formData.name ||
-              formData.ingredients.length === 0 ||
-              formData.ingredients.some(ingredient => !ingredient.ingredientId || ingredient.ingredientId.trim() === '')
-            }
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <Save className="h-4 w-4" />
-            {loading ? 'Saving...' : 'Save Recipe'}
-          </button>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={onCancel}
+              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={
+                loading ||
+                !formData.name ||
+                formData.ingredients.length === 0 ||
+                formData.ingredients.some(ingredient => !ingredient.ingredientId || ingredient.ingredientId.trim() === '')
+              }
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <Save className="h-4 w-4" />
+              {loading ? 'Saving...' : 'Save Recipe'}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

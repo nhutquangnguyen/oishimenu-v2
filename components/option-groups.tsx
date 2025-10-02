@@ -1,10 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Search, MoreHorizontal, Package, Edit3, Trash2 } from "lucide-react"
+import { Plus, Search, MoreHorizontal, Package, Edit3, Trash2, Calculator, X } from "lucide-react"
 import { EnhancedOptionGroupModal } from "./enhanced-option-group-modal"
+import { RecipeEditor } from "./recipe-editor"
 import type { OptionGroup, MenuItem } from "@/lib/types/menu"
+import type { Recipe } from "@/lib/types/inventory"
 import { getMenuItems, getMockMenuData } from "@/lib/services/menu"
+import { calculateRecipeCost } from "@/lib/services/inventory"
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('vi-VN', {
@@ -23,6 +26,16 @@ export function OptionGroups() {
   const [editingGroup, setEditingGroup] = useState<OptionGroup | null>(null)
   const [editingOption, setEditingOption] = useState<{groupIndex: number, optionIndex: number} | null>(null)
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
+
+  // Comprehensive option editing state
+  const [showOptionEditor, setShowOptionEditor] = useState(false)
+  const [editingOptionData, setEditingOptionData] = useState<{
+    groupIndex: number,
+    optionIndex: number,
+    name: string,
+    price: number,
+    recipe: Recipe | null
+  } | null>(null)
 
   // Load option groups from localStorage or Firebase (placeholder for now)
   useEffect(() => {
@@ -268,6 +281,60 @@ export function OptionGroups() {
     }
   }
 
+  // Comprehensive option editing functions
+  const handleEditOptionComprehensive = (groupIndex: number, optionIndex: number) => {
+    const option = optionGroups[groupIndex].options[optionIndex]
+    setEditingOptionData({
+      groupIndex,
+      optionIndex,
+      name: option.name,
+      price: option.price,
+      recipe: option.recipe || {
+        id: `recipe-${Date.now()}`,
+        name: `${option.name} Recipe`,
+        description: "",
+        instructions: "",
+        prepTime: 0,
+        servingSize: 1,
+        ingredients: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    })
+    setShowOptionEditor(true)
+  }
+
+  const handleSaveOptionComprehensive = async () => {
+    if (!editingOptionData) return
+
+    try {
+      const { groupIndex, optionIndex, name, recipe } = editingOptionData
+
+      // Calculate cost for the recipe if it has ingredients
+      let calculatedPrice = editingOptionData.price
+      if (recipe && recipe.ingredients.length > 0) {
+        calculatedPrice = await calculateRecipeCost(recipe)
+      }
+
+      // Update the option with all data
+      handleUpdateOption(groupIndex, optionIndex, {
+        name: name,
+        price: calculatedPrice,
+        recipe: recipe
+      })
+
+      setShowOptionEditor(false)
+      setEditingOptionData(null)
+    } catch (error) {
+      console.error('Error saving option:', error)
+    }
+  }
+
+  const handleCancelOptionEditing = () => {
+    setShowOptionEditor(false)
+    setEditingOptionData(null)
+  }
+
   const filteredGroups = optionGroups.filter(group =>
     group.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
@@ -450,12 +517,10 @@ export function OptionGroups() {
                                 defaultValue={option.name}
                                 onBlur={(e) => {
                                   handleUpdateOption(groupIndex, optionIndex, { name: e.target.value })
-                                  setEditingOption(null)
                                 }}
                                 onKeyPress={(e) => {
                                   if (e.key === 'Enter') {
                                     handleUpdateOption(groupIndex, optionIndex, { name: (e.target as HTMLInputElement).value })
-                                    setEditingOption(null)
                                   }
                                 }}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -479,13 +544,50 @@ export function OptionGroups() {
                                 min="0"
                               />
                             </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-2">Recipe</label>
+                              <button
+                                type="button"
+                                onClick={() => setEditingOption(null)}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
+                              >
+                                <Calculator className="h-4 w-4" />
+                                Use the Edit button for full recipe editing
+                              </button>
+                              {option.recipe && (
+                                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                                  <div className="flex items-center gap-2 text-green-800 text-xs">
+                                    <Calculator className="h-3 w-3" />
+                                    <span>Recipe with {option.recipe.ingredients.length} ingredients</span>
+                                    <span>•</span>
+                                    <span>Cost: {formatPrice(option.price)}</span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex gap-2 pt-2">
+                              <button
+                                onClick={() => setEditingOption(null)}
+                                className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                              >
+                                Done
+                              </button>
+                            </div>
                           </div>
                         ) : (
                           <div>
                             <h3 className="font-medium text-gray-900">{option.name}</h3>
-                            <p className="text-sm text-gray-600">
-                              {option.price > 0 ? formatPrice(option.price) : 'Free'}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm text-gray-600">
+                                {option.price > 0 ? formatPrice(option.price) : 'Free'}
+                              </p>
+                              {option.recipe && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-green-100 text-green-800">
+                                  <Calculator className="h-3 w-3 mr-1" />
+                                  Recipe
+                                </span>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -494,7 +596,7 @@ export function OptionGroups() {
                         {!isEditing && (
                           <>
                             <button
-                              onClick={() => setEditingOption({ groupIndex, optionIndex })}
+                              onClick={() => handleEditOptionComprehensive(groupIndex, optionIndex)}
                               className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg"
                               title="Edit option"
                             >
@@ -531,6 +633,100 @@ export function OptionGroups() {
         onSave={handleSaveGroup}
         optionGroup={editingGroup}
       />
+
+      {/* Comprehensive Option Editor Modal */}
+      {showOptionEditor && editingOptionData && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="w-full max-w-4xl max-h-[95vh] bg-white rounded-lg shadow-xl flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b bg-gray-50 rounded-t-lg flex-shrink-0">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Edit Option & Recipe
+              </h2>
+              <button
+                onClick={handleCancelOptionEditing}
+                className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-600" />
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 p-6">
+              <div className="space-y-6">
+                {/* Option Details Section */}
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h3 className="text-lg font-medium text-blue-900 mb-4">Option Details</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Option Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={editingOptionData.name}
+                        onChange={(e) => setEditingOptionData(prev => prev ? { ...prev, name: e.target.value } : null)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter option name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Additional Price (VND)
+                      </label>
+                      <input
+                        type="number"
+                        value={editingOptionData.price}
+                        onChange={(e) => setEditingOptionData(prev => prev ? { ...prev, price: parseInt(e.target.value) || 0 } : null)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        min="0"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">
+                    The price will be automatically calculated based on recipe ingredients if a recipe is provided.
+                  </p>
+                </div>
+
+                {/* Recipe Section */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Recipe</h3>
+                  {editingOptionData.recipe && (
+                    <RecipeEditor
+                      recipe={editingOptionData.recipe}
+                      onSave={(updatedRecipe) => {
+                        setEditingOptionData(prev => prev ? { ...prev, recipe: updatedRecipe } : null)
+                      }}
+                      onCancel={() => {}}
+                      hideButtons={true}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="border-t p-4 bg-gray-50 rounded-b-lg flex-shrink-0">
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={handleCancelOptionEditing}
+                  className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveOptionComprehensive}
+                  disabled={!editingOptionData?.name.trim()}
+                  className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -6,6 +6,7 @@ import { InventoryItems } from "@/components/inventory-items"
 import { InventoryOptionGroups } from "@/components/inventory-option-groups"
 import { InventoryBulkUpdate } from "@/components/inventory-bulk-update"
 import { InventoryManagement } from "@/components/inventory-management"
+import { OptionManagement } from "@/components/option-management"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 export default function InventoryPage() {
@@ -33,6 +34,12 @@ export default function InventoryPage() {
               ITEMS
             </TabsTrigger>
             <TabsTrigger
+              value="options"
+              className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
+            >
+              OPTIONS
+            </TabsTrigger>
+            <TabsTrigger
               value="option-groups"
               className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
@@ -52,6 +59,10 @@ export default function InventoryPage() {
 
           <TabsContent value="items" className="mt-6">
             <InventoryItems />
+          </TabsContent>
+
+          <TabsContent value="options" className="mt-6">
+            <OptionManagement />
           </TabsContent>
 
           <TabsContent value="option-groups" className="mt-6">

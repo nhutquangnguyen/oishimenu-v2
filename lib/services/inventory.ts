@@ -513,10 +513,35 @@ export async function deductIngredientsForMenuItem(
       return false;
     }
 
-    // TODO: Deduct ingredients for selected options (if they have recipes)
-    // This would require extending the option group system to include recipes
+    // Deduct ingredients for selected options (if they have recipes)
+    let optionDeductionSuccess = true;
+    if (selectedOptions && selectedOptions.length > 0 && menuItem.optionGroups) {
+      for (const selectedOption of selectedOptions) {
+        // Find the option group
+        const optionGroup = menuItem.optionGroups.find(group => group.name === selectedOption.groupName);
+        if (optionGroup) {
+          // Find the specific option
+          const option = optionGroup.options.find(opt => opt.name === selectedOption.optionName);
+          if (option && option.recipe) {
+            // Deduct ingredients for this option's recipe
+            const optionSuccess = await deductIngredientsFromRecipe(option.recipe, quantity);
+            if (!optionSuccess) {
+              console.error(`Failed to deduct ingredients for option: ${selectedOption.optionName} in group: ${selectedOption.groupName}`);
+              optionDeductionSuccess = false;
+            } else {
+              console.log(`Successfully deducted ingredients for option: ${selectedOption.optionName} (${quantity}x)`);
+            }
+          }
+        }
+      }
+    }
 
-    console.log(`Successfully deducted ingredients for ${quantity}x ${menuItem.name} (${selectedSize || 'default size'})`);
+    if (!optionDeductionSuccess) {
+      console.warn(`Some option ingredient deductions failed for ${menuItem.name}`);
+      return false;
+    }
+
+    console.log(`Successfully deducted ingredients for ${quantity}x ${menuItem.name} (${selectedSize || 'default size'}) with ${selectedOptions.length} options`);
     return true;
 
   } catch (error) {

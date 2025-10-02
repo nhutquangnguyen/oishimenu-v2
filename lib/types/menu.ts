@@ -10,7 +10,8 @@ export interface OptionGroup {
   name: string;
   minSelection: number;
   maxSelection: number;
-  options: MenuOption[];
+  options: MenuOption[]; // Legacy embedded options (for backward compatibility)
+  optionReferences?: import('./option').OptionReference[]; // New reference-based options
   connectedMenuItems?: string[]; // Array of menu item IDs that this option group is connected to
 }
 
