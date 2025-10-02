@@ -148,6 +148,29 @@ export async function getMenuItem(id: string): Promise<MenuItem | null> {
 }
 
 /**
+ * Add a new menu category
+ */
+export async function addMenuCategory(category: Omit<MenuCategory, 'id' | 'createdAt' | 'updatedAt'>): Promise<string | null> {
+  try {
+    if (!db) {
+      throw new Error('Firestore not available');
+    }
+
+    const categoryData = {
+      ...category,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const docRef = await addDoc(collection(db, 'menu-categories'), categoryData);
+    return docRef.id;
+  } catch (error) {
+    console.error('Error adding menu category:', error);
+    return null;
+  }
+}
+
+/**
  * Add a new menu item
  */
 export async function addMenuItem(item: Omit<MenuItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<string | null> {
@@ -169,6 +192,10 @@ export async function addMenuItem(item: Omit<MenuItem, 'id' | 'createdAt' | 'upd
     return null;
   }
 }
+
+// Aliases for consistency
+export const createMenuCategory = addMenuCategory;
+export const createMenuItem = addMenuItem;
 
 /**
  * Update a menu item
@@ -207,6 +234,73 @@ export async function deleteMenuItem(id: string): Promise<boolean> {
     return true;
   } catch (error) {
     console.error('Error deleting menu item:', error);
+    return false;
+  }
+}
+
+/**
+ * Update a menu category
+ */
+export async function updateMenuCategory(id: string, updates: Partial<MenuCategory>): Promise<boolean> {
+  try {
+    if (!db) {
+      throw new Error('Firestore not available');
+    }
+
+    const docRef = doc(db, 'menu-categories', id);
+    await updateDoc(docRef, {
+      ...updates,
+      updatedAt: new Date(),
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Error updating menu category:', error);
+    return false;
+  }
+}
+
+/**
+ * Delete a menu category
+ */
+export async function deleteMenuCategory(id: string): Promise<boolean> {
+  try {
+    if (!db) {
+      throw new Error('Firestore not available');
+    }
+
+    const docRef = doc(db, 'menu-categories', id);
+    await deleteDoc(docRef);
+
+    return true;
+  } catch (error) {
+    console.error('Error deleting menu category:', error);
+    return false;
+  }
+}
+
+/**
+ * Update multiple category orders
+ */
+export async function updateCategoryOrders(categories: Array<{id: string, displayOrder: number}>): Promise<boolean> {
+  try {
+    if (!db) {
+      throw new Error('Firestore not available');
+    }
+
+    // Update all categories in parallel
+    const updatePromises = categories.map(async (category) => {
+      const docRef = doc(db, 'menu-categories', category.id);
+      return updateDoc(docRef, {
+        displayOrder: category.displayOrder,
+        updatedAt: new Date(),
+      });
+    });
+
+    await Promise.all(updatePromises);
+    return true;
+  } catch (error) {
+    console.error('Error updating category orders:', error);
     return false;
   }
 }

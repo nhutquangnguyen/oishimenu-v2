@@ -111,7 +111,7 @@ function csvToMenuItem(csvItem: CSVMenuItem): MenuItem {
     csvItem.Photo2,
     csvItem.Photo3,
     csvItem.Photo4,
-  ].filter(Boolean).map(sanitizeString);
+  ].filter((photo): photo is string => Boolean(photo)).map(sanitizeString);
 
   const optionGroups: OptionGroup[] = [
     csvItem.OptionGroup1,
@@ -121,6 +121,7 @@ function csvToMenuItem(csvItem: CSVMenuItem): MenuItem {
     csvItem.OptionGroup5,
     csvItem.OptionGroup6,
   ]
+    .filter((optionGroup): optionGroup is string => Boolean(optionGroup))
     .map(parseOptionGroup)
     .filter((group): group is OptionGroup => group !== null);
 

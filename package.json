@@ -9,6 +9,9 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "seed": "tsx scripts/seed-database.ts",
+    "import:menu": "tsx scripts/import-menu-csv.ts",
+    "test:firebase": "tsx scripts/test-firebase-write.ts",
+    "import:api": "tsx scripts/import-via-api.ts",
     "firebase:init": "firebase init",
     "firebase:deploy": "firebase deploy",
     "vercel:deploy": "vercel --prod"
@@ -23,6 +26,7 @@
     "@radix-ui/react-tooltip": "^1.0.7",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "dotenv": "^17.2.3",
     "firebase": "^10.8.0",
     "firebase-admin": "^13.5.0",
     "framer-motion": "^11.0.3",

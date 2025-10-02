@@ -17,8 +17,16 @@ const firebaseConfig = {
 // Check if Firebase is disabled
 const isFirebaseDisabled = process.env.NEXT_PUBLIC_FIREBASE_DISABLED === 'true'
 
-// Validate Firebase configuration
-const isValidConfig = !isFirebaseDisabled && Object.values(firebaseConfig).every(value =>
+// Validate Firebase configuration (measurementId is optional)
+const requiredFields = {
+  apiKey: firebaseConfig.apiKey,
+  authDomain: firebaseConfig.authDomain,
+  projectId: firebaseConfig.projectId,
+  storageBucket: firebaseConfig.storageBucket,
+  messagingSenderId: firebaseConfig.messagingSenderId,
+  appId: firebaseConfig.appId,
+}
+const isValidConfig = !isFirebaseDisabled && Object.values(requiredFields).every(value =>
   value !== undefined && value !== null && value !== ''
 )
 

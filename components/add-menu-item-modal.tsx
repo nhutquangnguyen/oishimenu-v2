@@ -1,117 +1,99 @@
 "use client"
 
 import { useState } from "react"
-import { X, Plus, Minus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { X, Plus, Trash2 } from "lucide-react"
 import type { MenuItem, OptionGroup, MenuOption } from "@/lib/types/menu"
 
 interface AddMenuItemModalProps {
   isOpen: boolean
   onClose: () => void
-  onSuccess: () => void
+  onSuccess?: () => void
   categories: string[]
 }
 
 export function AddMenuItemModal({ isOpen, onClose, onSuccess, categories }: AddMenuItemModalProps) {
-  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     price: "",
     categoryName: "",
     description: "",
-    availableStatus: "AVAILABLE" as const,
+    availableStatus: "AVAILABLE" as MenuItem['availableStatus'],
     photos: [""],
-    optionGroups: [] as Array<{
-      name: string
-      minSelection: number
-      maxSelection: number
-      options: Array<{ name: string, price: number }>
-    }>
+    optionGroups: [] as OptionGroup[]
   })
 
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      price: "",
-      categoryName: "",
-      description: "",
-      availableStatus: "AVAILABLE",
-      photos: [""],
-      optionGroups: []
-    })
-  }
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState("")
+
+  if (!isOpen) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!formData.name || !formData.price || !formData.categoryName) {
-      alert("Please fill in all required fields")
-      return
-    }
-
-    setLoading(true)
+    setIsSubmitting(true)
+    setError("")
 
     try {
+      const menuItem: Omit<MenuItem, 'id' | 'createdAt' | 'updatedAt'> = {
+        name: formData.name.trim(),
+        price: parseInt(formData.price),
+        categoryName: formData.categoryName,
+        description: formData.description.trim(),
+        availableStatus: formData.availableStatus,
+        photos: formData.photos.filter(photo => photo.trim() !== ""),
+        optionGroups: formData.optionGroups,
+      }
+
       const response = await fetch('/api/menu', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'add-item',
-          data: {
-            id: `item-${Date.now()}`, // Simple ID generation
-            name: formData.name,
-            price: parseInt(formData.price),
-            categoryName: formData.categoryName,
-            description: formData.description,
-            availableStatus: formData.availableStatus,
-            photos: formData.photos.filter(photo => photo.trim() !== ""),
-            optionGroups: formData.optionGroups.map(group => ({
-              name: group.name,
-              minSelection: group.minSelection,
-              maxSelection: group.maxSelection,
-              options: group.options.filter(option => option.name.trim() !== "")
-            })).filter(group => group.name.trim() !== ""),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          }
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'add-item', data: menuItem })
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.details || error.error || 'Failed to add menu item')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to add menu item')
       }
 
-      const result = await response.json()
-      console.log('Menu item added successfully:', result)
+      // Reset form
+      setFormData({
+        name: "",
+        price: "",
+        categoryName: "",
+        description: "",
+        availableStatus: "AVAILABLE",
+        photos: [""],
+        optionGroups: []
+      })
 
-      resetForm()
-      onSuccess()
+      onSuccess?.()
       onClose()
-    } catch (error) {
-      console.error('Error adding menu item:', error)
-      alert(`Failed to add menu item: ${error instanceof Error ? error.message : 'Unknown error'}`)
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add menu item')
     } finally {
-      setLoading(false)
+      setIsSubmitting(false)
     }
+  }
+
+  const addPhoto = () => {
+    setFormData(prev => ({
+      ...prev,
+      photos: [...prev.photos, ""]
+    }))
+  }
+
+  const updatePhoto = (index: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      photos: prev.photos.map((photo, i) => i === index ? value : photo)
+    }))
+  }
+
+  const removePhoto = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      photos: prev.photos.filter((_, i) => i !== index)
+    }))
   }
 
   const addOptionGroup = () => {
@@ -126,19 +108,19 @@ export function AddMenuItemModal({ isOpen, onClose, onSuccess, categories }: Add
     }))
   }
 
-  const updateOptionGroup = (index: number, field: string, value: any) => {
+  const updateOptionGroup = (groupIndex: number, field: keyof OptionGroup, value: any) => {
     setFormData(prev => ({
       ...prev,
       optionGroups: prev.optionGroups.map((group, i) =>
-        i === index ? { ...group, [field]: value } : group
+        i === groupIndex ? { ...group, [field]: value } : group
       )
     }))
   }
 
-  const removeOptionGroup = (index: number) => {
+  const removeOptionGroup = (groupIndex: number) => {
     setFormData(prev => ({
       ...prev,
-      optionGroups: prev.optionGroups.filter((_, i) => i !== index)
+      optionGroups: prev.optionGroups.filter((_, i) => i !== groupIndex)
     }))
   }
 
@@ -153,15 +135,15 @@ export function AddMenuItemModal({ isOpen, onClose, onSuccess, categories }: Add
     }))
   }
 
-  const updateOption = (groupIndex: number, optionIndex: number, field: string, value: any) => {
+  const updateOption = (groupIndex: number, optionIndex: number, field: keyof MenuOption, value: any) => {
     setFormData(prev => ({
       ...prev,
-      optionGroups: prev.optionGroups.map((group, i) =>
-        i === groupIndex
+      optionGroups: prev.optionGroups.map((group, gi) =>
+        gi === groupIndex
           ? {
               ...group,
-              options: group.options.map((option, j) =>
-                j === optionIndex ? { ...option, [field]: value } : option
+              options: group.options.map((option, oi) =>
+                oi === optionIndex ? { ...option, [field]: value } : option
               )
             }
           : group
@@ -172,209 +154,259 @@ export function AddMenuItemModal({ isOpen, onClose, onSuccess, categories }: Add
   const removeOption = (groupIndex: number, optionIndex: number) => {
     setFormData(prev => ({
       ...prev,
-      optionGroups: prev.optionGroups.map((group, i) =>
-        i === groupIndex
-          ? { ...group, options: group.options.filter((_, j) => j !== optionIndex) }
+      optionGroups: prev.optionGroups.map((group, gi) =>
+        gi === groupIndex
+          ? { ...group, options: group.options.filter((_, oi) => oi !== optionIndex) }
           : group
       )
     }))
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Add New Menu Item</DialogTitle>
-        </DialogHeader>
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900">Add New Menu Item</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+              <p className="text-red-800 text-sm">{error}</p>
+            </div>
+          )}
+
           {/* Basic Information */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
+
             <div>
-              <Label htmlFor="name">Item Name *</Label>
-              <Input
-                id="name"
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Item Name *
+              </label>
+              <input
+                type="text"
+                required
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="Enter item name"
-                required
               />
             </div>
 
-            <div>
-              <Label htmlFor="price">Price (VND) *</Label>
-              <Input
-                id="price"
-                type="number"
-                value={formData.price}
-                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                placeholder="25000"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="category">Category *</Label>
-              <Select
-                value={formData.categoryName}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, categoryName: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                  <SelectItem value="custom">Enter custom category</SelectItem>
-                </SelectContent>
-              </Select>
-              {formData.categoryName === 'custom' && (
-                <Input
-                  className="mt-2"
-                  placeholder="Enter category name"
-                  value={formData.categoryName === 'custom' ? '' : formData.categoryName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, categoryName: e.target.value }))}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Price (VND) *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={formData.price}
+                  onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="25000"
                 />
-              )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category *
+                </label>
+                <select
+                  required
+                  value={formData.categoryName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, categoryName: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="">Select category</option>
+                  {categories.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div>
-              <Label htmlFor="status">Status</Label>
-              <Select
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Status
+              </label>
+              <select
                 value={formData.availableStatus}
-                onValueChange={(value: any) => setFormData(prev => ({ ...prev, availableStatus: value }))}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  availableStatus: e.target.value as MenuItem['availableStatus']
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="AVAILABLE">Available</SelectItem>
-                  <SelectItem value="UNAVAILABLE_TODAY">Unavailable Today</SelectItem>
-                  <SelectItem value="UNAVAILABLE_PERMANENTLY">Unavailable Permanently</SelectItem>
-                </SelectContent>
-              </Select>
+                <option value="AVAILABLE">Available</option>
+                <option value="UNAVAILABLE_TODAY">Unavailable Today</option>
+                <option value="UNAVAILABLE_PERMANENTLY">Unavailable Permanently</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Enter item description"
+              />
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Enter item description"
-              rows={3}
-            />
-          </div>
+          {/* Photos */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-900">Photos</h3>
+              <button
+                type="button"
+                onClick={addPhoto}
+                className="flex items-center gap-2 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                Add Photo
+              </button>
+            </div>
 
-          <div>
-            <Label htmlFor="photo">Photo URL</Label>
-            <Input
-              id="photo"
-              value={formData.photos[0]}
-              onChange={(e) => setFormData(prev => ({
-                ...prev,
-                photos: [e.target.value, ...prev.photos.slice(1)]
-              }))}
-              placeholder="https://example.com/photo.jpg"
-            />
+            {formData.photos.map((photo, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  type="url"
+                  value={photo}
+                  onChange={(e) => updatePhoto(index, e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Enter photo URL"
+                />
+                {formData.photos.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(index)}
+                    className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
 
           {/* Option Groups */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <Label className="text-base font-semibold">Option Groups</Label>
-              <Button type="button" onClick={addOptionGroup} variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-1" />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-900">Option Groups</h3>
+              <button
+                type="button"
+                onClick={addOptionGroup}
+                className="flex items-center gap-2 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              >
+                <Plus className="h-4 w-4" />
                 Add Option Group
-              </Button>
+              </button>
             </div>
 
             {formData.optionGroups.map((group, groupIndex) => (
-              <div key={groupIndex} className="border rounded-lg p-4 mb-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-medium">Option Group {groupIndex + 1}</h4>
-                  <Button
+              <div key={groupIndex} className="border border-gray-200 rounded-lg p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-gray-900">Option Group {groupIndex + 1}</h4>
+                  <button
                     type="button"
                     onClick={() => removeOptionGroup(groupIndex)}
-                    variant="ghost"
-                    size="sm"
+                    className="text-red-600 hover:bg-red-50 p-1 rounded"
                   >
-                    <X className="h-4 w-4" />
-                  </Button>
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 mb-3">
+                <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label>Group Name</Label>
-                    <Input
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Group Name
+                    </label>
+                    <input
+                      type="text"
                       value={group.name}
                       onChange={(e) => updateOptionGroup(groupIndex, 'name', e.target.value)}
-                      placeholder="Size, Topping, etc."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="e.g., Size"
                     />
                   </div>
                   <div>
-                    <Label>Min Selection</Label>
-                    <Input
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Min Selection
+                    </label>
+                    <input
                       type="number"
+                      min="0"
                       value={group.minSelection}
                       onChange={(e) => updateOptionGroup(groupIndex, 'minSelection', parseInt(e.target.value))}
-                      min="0"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <Label>Max Selection</Label>
-                    <Input
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Max Selection
+                    </label>
+                    <input
                       type="number"
+                      min="1"
                       value={group.maxSelection}
                       onChange={(e) => updateOptionGroup(groupIndex, 'maxSelection', parseInt(e.target.value))}
-                      min="1"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm">Options</Label>
-                    <Button
+                    <label className="block text-sm font-medium text-gray-700">Options</label>
+                    <button
                       type="button"
                       onClick={() => addOption(groupIndex)}
-                      variant="outline"
-                      size="sm"
+                      className="flex items-center gap-1 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
                     >
-                      <Plus className="h-3 w-3 mr-1" />
+                      <Plus className="h-3 w-3" />
                       Add Option
-                    </Button>
+                    </button>
                   </div>
 
                   {group.options.map((option, optionIndex) => (
-                    <div key={optionIndex} className="flex gap-2 items-center">
-                      <Input
+                    <div key={optionIndex} className="flex gap-2">
+                      <input
+                        type="text"
                         value={option.name}
                         onChange={(e) => updateOption(groupIndex, optionIndex, 'name', e.target.value)}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         placeholder="Option name"
-                        className="flex-1"
                       />
-                      <Input
+                      <input
                         type="number"
+                        min="0"
                         value={option.price}
-                        onChange={(e) => updateOption(groupIndex, optionIndex, 'price', parseInt(e.target.value) || 0)}
+                        onChange={(e) => updateOption(groupIndex, optionIndex, 'price', parseInt(e.target.value))}
+                        className="w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         placeholder="Price"
-                        className="w-24"
                       />
-                      <Button
-                        type="button"
-                        onClick={() => removeOption(groupIndex, optionIndex)}
-                        variant="ghost"
-                        size="sm"
-                      >
-                        <Minus className="h-3 w-3" />
-                      </Button>
+                      {group.options.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeOption(groupIndex, optionIndex)}
+                          className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -382,17 +414,25 @@ export function AddMenuItemModal({ isOpen, onClose, onSuccess, categories }: Add
             ))}
           </div>
 
-          {/* Submit Buttons */}
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
+          {/* Form Actions */}
+          <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+            >
               Cancel
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Adding..." : "Add Menu Item"}
-            </Button>
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isSubmitting ? 'Adding...' : 'Add Item'}
+            </button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   )
 }

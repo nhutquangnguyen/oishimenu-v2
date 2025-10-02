@@ -15,6 +15,12 @@ This document defines how we build and collaborate on the project consistently: 
 - **Push frequency**: After each feature, fix, or meaningful change
 - **Commit message style**: Descriptive with Claude Code attribution
 
+### 🚀 Deployment Rules
+- **ONLY deploy to production when explicitly requested by the user**
+- **No automatic production deployments** — always ask for permission first
+- **Local development first** — test all changes locally before any deployment
+- **Deployment commands**: Use `vercel --prod` only when user requests production deployment
+
 ### Development Rules
 - **No hard-coding, no mockups** — use env vars and Firestore config.
 - **Create shared pieces** when a component/hook/util is used **2+ times** (keep generic).

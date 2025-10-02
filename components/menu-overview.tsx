@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Search, ChevronDown, MoreHorizontal, Loader2 } from "lucide-react"
-import { EditItemModal } from "./edit-item-modal"
+import { Plus, Search, ChevronDown, MoreHorizontal, Loader2, Edit, ArrowUp, ArrowDown } from "lucide-react"
+import { ItemDetailModal } from "./item-detail-modal"
+import { AddMenuItemModal } from "./add-menu-item-modal"
+import { EditCategoryModal } from "./edit-category-modal"
 import {
   Select,
   SelectContent,
@@ -10,9 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { getMenuCategories, getMenuItems, getMockMenuData } from "@/lib/services/menu"
+import { getMenuCategories, getMenuItems, updateCategoryOrders } from "@/lib/services/menu"
 import type { MenuItem as FirebaseMenuItem, MenuCategory } from "@/lib/types/menu"
-import { AddMenuItemModal } from "./add-menu-item-modal"
 
 interface DisplayMenuItem {
   id: string
@@ -26,6 +27,7 @@ interface DisplayCategory {
   name: string
   count: number
   items: DisplayMenuItem[]
+  categoryData: MenuCategory
 }
 
 function formatPrice(price: number): string {
@@ -37,14 +39,16 @@ function formatPrice(price: number): string {
 }
 
 export function MenuOverview() {
-  const [selectedItem, setSelectedItem] = useState<DisplayMenuItem | null>(null)
+  const [selectedItem, setSelectedItem] = useState<FirebaseMenuItem | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [categories, setCategories] = useState<DisplayCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filterAvailability, setFilterAvailability] = useState("all-schedules")
   const [filterStatus, setFilterStatus] = useState("all-items")
-  const [showAddModal, setShowAddModal] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [editingCategory, setEditingCategory] = useState<MenuCategory | null>(null)
 
   useEffect(() => {
     loadMenuData()
@@ -55,7 +59,7 @@ export function MenuOverview() {
       setLoading(true)
       setError(null)
 
-      // Try to fetch from Firebase first
+      // Fetch real data from Firebase
       const [firebaseCategories, firebaseItems] = await Promise.all([
         getMenuCategories(),
         getMenuItems({
@@ -65,31 +69,24 @@ export function MenuOverview() {
         })
       ])
 
-      // If no data from Firebase, use mock data
+      const displayCategories = transformToDisplayFormat(firebaseCategories, firebaseItems)
+      setCategories(displayCategories)
+
+      // Show helpful message if no data exists
       if (firebaseCategories.length === 0 && firebaseItems.length === 0) {
-        console.log('No Firebase data found, using mock data')
-        const mockData = getMockMenuData()
-        const displayCategories = transformToDisplayFormat(mockData.categories, mockData.items)
-        setCategories(displayCategories)
-      } else {
-        const displayCategories = transformToDisplayFormat(firebaseCategories, firebaseItems)
-        setCategories(displayCategories)
+        console.log('No menu data found in database. Please import menu data first.')
       }
     } catch (err) {
       console.error('Error loading menu data:', err)
-      setError('Failed to load menu data')
-
-      // Fallback to mock data on error
-      const mockData = getMockMenuData()
-      const displayCategories = transformToDisplayFormat(mockData.categories, mockData.items)
-      setCategories(displayCategories)
+      setError('Failed to load menu data from database')
+      setCategories([])
     } finally {
       setLoading(false)
     }
   }
 
   function transformToDisplayFormat(categories: MenuCategory[], items: FirebaseMenuItem[]): DisplayCategory[] {
-    return categories.map(category => {
+    return categories.map((category, index) => {
       const categoryItems = items
         .filter(item => item.categoryName === category.name)
         .filter(item => {
@@ -110,10 +107,17 @@ export function MenuOverview() {
           firebaseData: item
         }))
 
+      // Ensure displayOrder exists, use index as fallback
+      const categoryData = {
+        ...category,
+        displayOrder: category.displayOrder ?? index + 1
+      }
+
       return {
         name: category.name,
         count: categoryItems.length,
-        items: categoryItems
+        items: categoryItems,
+        categoryData: categoryData
       }
     })
   }
@@ -123,6 +127,86 @@ export function MenuOverview() {
     return category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
            category.items.some(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
   })
+
+  const moveCategoryUp = async (categoryIndex: number) => {
+    if (categoryIndex === 0) return
+
+    try {
+      const newCategories = [...categories]
+      const categoryToMove = newCategories[categoryIndex]
+      const categoryAbove = newCategories[categoryIndex - 1]
+
+      // Safety checks
+      if (!categoryToMove?.categoryData || !categoryAbove?.categoryData) {
+        console.error('Invalid category data for move operation')
+        return
+      }
+
+      // Ensure display orders exist
+      const currentOrder = categoryToMove.categoryData.displayOrder ?? categoryIndex + 1
+      const aboveOrder = categoryAbove.categoryData.displayOrder ?? categoryIndex
+
+      // Update display orders
+      categoryToMove.categoryData.displayOrder = aboveOrder
+      categoryAbove.categoryData.displayOrder = currentOrder
+
+      // Swap positions in array
+      newCategories[categoryIndex] = categoryAbove
+      newCategories[categoryIndex - 1] = categoryToMove
+
+      setCategories(newCategories)
+
+      // Update in database
+      await updateCategoryOrders([
+        { id: categoryToMove.categoryData.id, displayOrder: categoryToMove.categoryData.displayOrder },
+        { id: categoryAbove.categoryData.id, displayOrder: categoryAbove.categoryData.displayOrder }
+      ])
+    } catch (error) {
+      console.error('Error moving category up:', error)
+      // Reload data to reset state
+      loadMenuData()
+    }
+  }
+
+  const moveCategoryDown = async (categoryIndex: number) => {
+    if (categoryIndex === categories.length - 1) return
+
+    try {
+      const newCategories = [...categories]
+      const categoryToMove = newCategories[categoryIndex]
+      const categoryBelow = newCategories[categoryIndex + 1]
+
+      // Safety checks
+      if (!categoryToMove?.categoryData || !categoryBelow?.categoryData) {
+        console.error('Invalid category data for move operation')
+        return
+      }
+
+      // Ensure display orders exist
+      const currentOrder = categoryToMove.categoryData.displayOrder ?? categoryIndex + 1
+      const belowOrder = categoryBelow.categoryData.displayOrder ?? categoryIndex + 2
+
+      // Update display orders
+      categoryToMove.categoryData.displayOrder = belowOrder
+      categoryBelow.categoryData.displayOrder = currentOrder
+
+      // Swap positions in array
+      newCategories[categoryIndex] = categoryBelow
+      newCategories[categoryIndex + 1] = categoryToMove
+
+      setCategories(newCategories)
+
+      // Update in database
+      await updateCategoryOrders([
+        { id: categoryToMove.categoryData.id, displayOrder: categoryToMove.categoryData.displayOrder },
+        { id: categoryBelow.categoryData.id, displayOrder: categoryBelow.categoryData.displayOrder }
+      ])
+    } catch (error) {
+      console.error('Error moving category down:', error)
+      // Reload data to reset state
+      loadMenuData()
+    }
+  }
 
   if (loading) {
     return (
@@ -207,13 +291,75 @@ export function MenuOverview() {
           </div>
 
           <div className="space-y-2">
-            {filteredCategories.map((category) => (
+            {/* All Categories option */}
+            <div
+              onClick={() => setSelectedCategory(null)}
+              className={`flex items-center justify-between rounded-lg p-3 cursor-pointer transition-colors ${
+                selectedCategory === null
+                  ? 'bg-purple-100 border border-purple-200'
+                  : 'hover:bg-gray-50'
+              }`}
+            >
+              <span className={`text-sm font-medium ${
+                selectedCategory === null ? 'text-purple-900' : 'text-gray-900'
+              }`}>
+                All Categories
+              </span>
+              <span className="text-sm text-gray-500">
+                {filteredCategories.reduce((total, cat) => total + cat.count, 0)}
+              </span>
+            </div>
+
+            {filteredCategories.map((category, index) => (
               <div
                 key={category.name}
-                className="flex items-center justify-between rounded-lg p-3 hover:bg-gray-50 cursor-pointer"
+                className={`group rounded-lg border transition-colors ${
+                  selectedCategory === category.name
+                    ? 'bg-purple-100 border-purple-200'
+                    : 'border-transparent hover:bg-gray-50'
+                }`}
               >
-                <span className="text-sm text-gray-900">{category.name}</span>
-                <span className="text-sm text-gray-500">{category.count}</span>
+                <div className="flex items-center p-3">
+                  <div
+                    onClick={() => setSelectedCategory(category.name)}
+                    className="flex-1 cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className={`text-sm ${
+                        selectedCategory === category.name ? 'text-purple-900 font-medium' : 'text-gray-900'
+                      }`}>
+                        {category.name}
+                      </span>
+                      <span className="text-sm text-gray-500">{category.count}</span>
+                    </div>
+                  </div>
+
+                  <div className="ml-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => moveCategoryUp(index)}
+                      disabled={index === 0}
+                      className="p-1 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Move up"
+                    >
+                      <ArrowUp className="h-3 w-3 text-gray-600" />
+                    </button>
+                    <button
+                      onClick={() => moveCategoryDown(index)}
+                      disabled={index === filteredCategories.length - 1}
+                      className="p-1 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Move down"
+                    >
+                      <ArrowDown className="h-3 w-3 text-gray-600" />
+                    </button>
+                    <button
+                      onClick={() => setEditingCategory(category.categoryData)}
+                      className="p-1 rounded hover:bg-gray-200"
+                      title="Edit category"
+                    >
+                      <Edit className="h-3 w-3 text-gray-600" />
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -228,10 +374,13 @@ export function MenuOverview() {
           </div>
 
           <div className="space-y-4">
-            {filteredCategories.flatMap(category => category.items).map((item) => (
+            {filteredCategories
+              .filter(category => selectedCategory === null || category.name === selectedCategory)
+              .flatMap(category => category.items)
+              .map((item) => (
               <div
                 key={item.id}
-                onClick={() => setSelectedItem(item)}
+                onClick={() => setSelectedItem(item.firebaseData)}
                 className="flex items-center gap-3 rounded-lg border p-4 hover:bg-gray-50 cursor-pointer"
               >
                 <div className="h-15 w-15 rounded-lg bg-gray-100 flex items-center justify-center">
@@ -267,11 +416,16 @@ export function MenuOverview() {
                 </div>
               </div>
             ))}
-            {filteredCategories.every(category => category.items.length === 0) && (
+            {filteredCategories
+              .filter(category => selectedCategory === null || category.name === selectedCategory)
+              .every(category => category.items.length === 0) && (
               <div className="text-center py-8 text-gray-500">
                 <p>No menu items found</p>
                 {searchTerm && (
                   <p className="text-sm mt-1">Try adjusting your search or filters</p>
+                )}
+                {selectedCategory && !searchTerm && (
+                  <p className="text-sm mt-1">No items found in "{selectedCategory}" category</p>
                 )}
               </div>
             )}
@@ -280,10 +434,13 @@ export function MenuOverview() {
       </div>
 
       {selectedItem && (
-        <EditItemModal
+        <ItemDetailModal
           item={selectedItem}
           isOpen={!!selectedItem}
           onClose={() => setSelectedItem(null)}
+          onSuccess={() => {
+            loadMenuData() // Refresh the data after successful update
+          }}
         />
       )}
 
@@ -293,14 +450,16 @@ export function MenuOverview() {
         onSuccess={() => {
           loadMenuData() // Refresh the data after successful addition
         }}
-        categories={[
-          ...categories.map(c => c.name),
-          "Cà Phê - Coffee",
-          "Trà Sữa",
-          "Trà - Tea",
-          "Matcha",
-          "Đồ Ăn Nhanh"
-        ].filter((category, index, arr) => arr.indexOf(category) === index)} // Remove duplicates
+        categories={categories.map(c => c.name)}
+      />
+
+      <EditCategoryModal
+        category={editingCategory}
+        isOpen={!!editingCategory}
+        onClose={() => setEditingCategory(null)}
+        onSuccess={() => {
+          loadMenuData() // Refresh the data after successful update
+        }}
       />
     </div>
   )
