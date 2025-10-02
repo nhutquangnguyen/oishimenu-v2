@@ -40,15 +40,22 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function addMenuItem(item: MenuItem) {
+async function addMenuItem(item: Omit<MenuItem, 'id' | 'createdAt' | 'updatedAt'>) {
   try {
-    const docRef = doc(collection(db, 'menu-items'), item.id);
-    await setDoc(docRef, item);
+    // Add timestamps
+    const menuItemWithTimestamps = {
+      ...item,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    // Use addDoc to auto-generate an ID
+    const docRef = await addDoc(collection(db, 'menu-items'), menuItemWithTimestamps);
 
     return NextResponse.json({
       success: true,
       message: 'Menu item added successfully',
-      id: item.id
+      id: docRef.id
     });
   } catch (error) {
     console.error('Error adding menu item:', error);

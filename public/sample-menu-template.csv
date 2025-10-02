@@ -1,0 +1,4 @@
+*ItemID,*ItemName,*Price,*CategoryName,AvailabilitySchedule,*AvailableStatus,Description,Photo1,Photo2,Photo3,Photo4,OptionGroup1,OptionGroup2,OptionGroup3,OptionGroup4,OptionGroup5,OptionGroup6
+item-001,"Cà Phê Sữa Đá",25000,"Cà Phê - Coffee","","AVAILABLE","Traditional Vietnamese iced coffee with sweetened condensed milk","","","","","Kích cỡ","Độ ngọt","","","",""
+item-002,"Trà Sữa Trân Châu",35000,"Trà Sữa","","AVAILABLE","Classic milk tea with black pearls","","","","","Kích cỡ","Topping","Độ ngọt","","",""
+item-003,"Bánh Mì Thịt Nướng",45000,"Bánh Mì","","AVAILABLE","Grilled pork banh mi sandwich","","","","","","","","","",""

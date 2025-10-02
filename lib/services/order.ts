@@ -189,7 +189,7 @@ export async function updateOrder(id: string, updates: Partial<Order>): Promise<
 }
 
 /**
- * Update order status with timestamp tracking
+ * Update order status with timestamp tracking and inventory deduction
  */
 export async function updateOrderStatus(id: string, status: OrderStatus, updatedBy?: string): Promise<boolean> {
   try {
@@ -205,6 +205,10 @@ export async function updateOrderStatus(id: string, status: OrderStatus, updated
     // Add timestamp for specific status changes
     if (status === 'CONFIRMED') {
       updates.confirmedAt = new Date();
+
+      // Deduct inventory when order is confirmed
+      await processInventoryDeductionForOrder(id);
+
     } else if (status === 'READY') {
       updates.readyAt = new Date();
     } else if (status === 'DELIVERED') {
@@ -222,6 +226,45 @@ export async function updateOrderStatus(id: string, status: OrderStatus, updated
   } catch (error) {
     console.error('Error updating order status:', error);
     return false;
+  }
+}
+
+/**
+ * Process inventory deduction for an order
+ */
+async function processInventoryDeductionForOrder(orderId: string): Promise<void> {
+  try {
+    const order = await getOrder(orderId);
+    if (!order) {
+      console.error('Order not found for inventory deduction:', orderId);
+      return;
+    }
+
+    // Import the inventory service function
+    const { processOrderInventoryDeduction } = await import('@/lib/services/inventory');
+
+    // Convert order items to the format expected by inventory service
+    const orderItems = order.items.map(item => ({
+      menuItemId: item.menuItemId,
+      selectedSize: undefined, // TODO: Extract from selectedOptions if size-based ordering is implemented
+      selectedOptions: item.selectedOptions.map(option => ({
+        groupName: option.groupName,
+        optionName: option.optionName
+      })),
+      quantity: item.quantity
+    }));
+
+    const success = await processOrderInventoryDeduction(orderId, orderItems);
+
+    if (!success) {
+      console.error('Failed to process inventory deduction for order:', orderId);
+      // TODO: Could create a notification or alert for manual review
+    } else {
+      console.log('Successfully processed inventory deduction for order:', orderId);
+    }
+
+  } catch (error) {
+    console.error('Error processing inventory deduction for order:', orderId, error);
   }
 }
 

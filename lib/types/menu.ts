@@ -2,25 +2,40 @@
 export interface MenuOption {
   name: string;
   price: number;
+  recipe?: import('./inventory').Recipe; // Recipe for this option
 }
 
 export interface OptionGroup {
+  id?: string;
   name: string;
   minSelection: number;
   maxSelection: number;
   options: MenuOption[];
+  connectedMenuItems?: string[]; // Array of menu item IDs that this option group is connected to
+}
+
+export interface MenuItemSize {
+  size: string; // e.g., 'S', 'M', 'L', 'XL'
+  price: number; // Price for this size in VND
+  recipe?: import('./inventory').Recipe; // Complete recipe for this size
+  costPrice?: number; // Calculated cost for this size
 }
 
 export interface MenuItem {
   id: string; // ItemID from CSV
   name: string; // ItemName
-  price: number; // Price in VND
+  price: number; // Base/default price (for backward compatibility)
   categoryName: string; // CategoryName
   availabilitySchedule?: string; // AvailabilitySchedule
   availableStatus: 'AVAILABLE' | 'UNAVAILABLE_TODAY' | 'UNAVAILABLE_PERMANENTLY';
   description?: string; // Description
   photos: string[]; // Photo1, Photo2, Photo3, Photo4
   optionGroups: OptionGroup[]; // OptionGroup1-6
+  sizes?: MenuItemSize[]; // Multiple sizes with individual recipes and prices
+  defaultSize?: string; // Which size to show by default
+  // Legacy fields for backward compatibility
+  recipe?: import('./inventory').MenuItemRecipe; // Deprecated: use sizes instead
+  costPrice?: number; // Deprecated: use sizes instead
   createdAt?: Date;
   updatedAt?: Date;
 }

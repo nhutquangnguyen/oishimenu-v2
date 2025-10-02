@@ -1,8 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { X, Plus, Trash2 } from "lucide-react"
-import type { MenuItem, OptionGroup, MenuOption } from "@/lib/types/menu"
+import { X, Plus, Trash2, ChefHat, Copy } from "lucide-react"
+import { RecipeEditor } from "@/components/recipe-editor"
+import type { MenuItem, OptionGroup, MenuOption, MenuItemSize } from "@/lib/types/menu"
+import type { MenuItemRecipe, Recipe, SizeRecipe } from "@/lib/types/inventory"
 
 interface AddMenuItemModalProps {
   isOpen: boolean
@@ -19,13 +21,158 @@ export function AddMenuItemModal({ isOpen, onClose, onSuccess, categories }: Add
     description: "",
     availableStatus: "AVAILABLE" as MenuItem['availableStatus'],
     photos: [""],
-    optionGroups: [] as OptionGroup[]
+    optionGroups: [] as OptionGroup[],
+    sizes: [] as MenuItemSize[],
+    defaultSize: "",
+    // Legacy fields for backward compatibility
+    recipe: null as MenuItemRecipe | null,
+    costPrice: 0
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState("")
+  const [showRecipeEditor, setShowRecipeEditor] = useState(false)
+  const [editingSizeIndex, setEditingSizeIndex] = useState<number | null>(null)
+  const [currentSizeRecipe, setCurrentSizeRecipe] = useState<Recipe | null>(null)
 
   if (!isOpen) return null
+
+  const formatPrice = (price: number): string => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+    }).format(price).replace('₫', 'đ');
+  }
+
+  const handleSaveRecipe = (recipe: Recipe) => {
+    // If we're editing a size-specific recipe, use the size-specific handler
+    if (editingSizeIndex !== null) {
+      return handleSaveSizeRecipe(recipe)
+    }
+
+    // Legacy support: if no sizes are defined, save to the legacy recipe field
+    if (formData.sizes.length === 0) {
+      const menuItemRecipe: MenuItemRecipe = {
+        baseRecipe: recipe,
+        sizeVariations: undefined
+      }
+
+      setFormData({
+        ...formData,
+        recipe: menuItemRecipe,
+        costPrice: recipe.costPerServing || 0
+      })
+    }
+
+    setShowRecipeEditor(false)
+  }
+
+  const handleDeleteRecipe = () => {
+    if (confirm("Are you sure you want to delete this recipe? This will remove the cost calculation for this item.")) {
+      setFormData({
+        ...formData,
+        recipe: null,
+        costPrice: 0
+      })
+    }
+  }
+
+  // Size management handlers
+  const handleAddSize = () => {
+    const defaultSizes = ['S', 'M', 'L', 'XL']
+    const usedSizes = formData.sizes.map(s => s.size)
+    const availableSize = defaultSizes.find(size => !usedSizes.includes(size)) || `Size ${formData.sizes.length + 1}`
+
+    const newSize: MenuItemSize = {
+      size: availableSize,
+      price: parseInt(formData.price) || 0,
+      recipe: undefined,
+      costPrice: 0
+    }
+
+    setFormData({
+      ...formData,
+      sizes: [...formData.sizes, newSize],
+      defaultSize: formData.defaultSize || availableSize
+    })
+  }
+
+  const handleEditSizeRecipe = (sizeIndex: number) => {
+    const size = formData.sizes[sizeIndex]
+    setEditingSizeIndex(sizeIndex)
+    setCurrentSizeRecipe(size.recipe || null)
+    setShowRecipeEditor(true)
+  }
+
+  const handleSaveSizeRecipe = (recipe: Recipe) => {
+    if (editingSizeIndex !== null) {
+      const updatedSizes = formData.sizes.map((size, index) =>
+        index === editingSizeIndex
+          ? { ...size, recipe: recipe, costPrice: recipe.costPerServing || 0 }
+          : size
+      )
+
+      setFormData({
+        ...formData,
+        sizes: updatedSizes
+      })
+    }
+
+    setShowRecipeEditor(false)
+    setEditingSizeIndex(null)
+    setCurrentSizeRecipe(null)
+  }
+
+  const handleUpdateSize = (sizeIndex: number, updates: Partial<MenuItemSize>) => {
+    const updatedSizes = formData.sizes.map((size, index) =>
+      index === sizeIndex ? { ...size, ...updates } : size
+    )
+
+    setFormData({
+      ...formData,
+      sizes: updatedSizes
+    })
+  }
+
+  const handleDeleteSize = (sizeIndex: number) => {
+    if (confirm("Are you sure you want to delete this size? This will remove its recipe and pricing.")) {
+      const sizeToDelete = formData.sizes[sizeIndex]
+      const updatedSizes = formData.sizes.filter((_, index) => index !== sizeIndex)
+
+      setFormData({
+        ...formData,
+        sizes: updatedSizes,
+        defaultSize: formData.defaultSize === sizeToDelete.size
+          ? (updatedSizes[0]?.size || "")
+          : formData.defaultSize
+      })
+    }
+  }
+
+  const handleCloneSize = (sizeIndex: number) => {
+    const originalSize = formData.sizes[sizeIndex]
+    const clonedSize: MenuItemSize = {
+      size: `${originalSize.size} Copy`,
+      price: originalSize.price,
+      recipe: originalSize.recipe ? {
+        ...originalSize.recipe,
+        id: `recipe-${Date.now()}`,
+        name: `${originalSize.recipe.name} (Copy)`,
+        ingredients: originalSize.recipe.ingredients.map(ingredient => ({
+          ...ingredient
+        })),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      } : undefined,
+      costPrice: originalSize.costPrice
+    }
+
+    setFormData({
+      ...formData,
+      sizes: [...formData.sizes, clonedSize]
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,6 +188,11 @@ export function AddMenuItemModal({ isOpen, onClose, onSuccess, categories }: Add
         availableStatus: formData.availableStatus,
         photos: formData.photos.filter(photo => photo.trim() !== ""),
         optionGroups: formData.optionGroups,
+        sizes: formData.sizes,
+        defaultSize: formData.defaultSize,
+        // Legacy fields for backward compatibility
+        recipe: formData.recipe,
+        costPrice: formData.costPrice
       }
 
       const response = await fetch('/api/menu', {
@@ -62,7 +214,12 @@ export function AddMenuItemModal({ isOpen, onClose, onSuccess, categories }: Add
         description: "",
         availableStatus: "AVAILABLE",
         photos: [""],
-        optionGroups: []
+        optionGroups: [],
+        sizes: [],
+        defaultSize: "",
+        // Legacy fields for backward compatibility
+        recipe: null,
+        costPrice: 0
       })
 
       onSuccess?.()
@@ -266,6 +423,150 @@ export function AddMenuItemModal({ isOpen, onClose, onSuccess, categories }: Add
             </div>
           </div>
 
+          {/* Sizes, Recipes & Pricing */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-900">Sizes, Recipes & Pricing</h3>
+              <button
+                type="button"
+                onClick={handleAddSize}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
+              >
+                <Plus className="h-4 w-4" />
+                Add Size
+              </button>
+            </div>
+
+            {formData.sizes.length > 0 ? (
+              <div className="space-y-3">
+                {formData.sizes.map((size, index) => (
+                  <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="grid grid-cols-3 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Size</label>
+                            <input
+                              type="text"
+                              value={size.size}
+                              onChange={(e) => handleUpdateSize(index, { size: e.target.value })}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="e.g., S, M, L"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Price (VND)</label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={size.price}
+                              onChange={(e) => handleUpdateSize(index, { price: parseInt(e.target.value) || 0 })}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                          <div className="flex items-end">
+                            <label className="flex items-center text-xs">
+                              <input
+                                type="radio"
+                                name="defaultSize"
+                                checked={formData.defaultSize === size.size}
+                                onChange={() => setFormData({ ...formData, defaultSize: size.size })}
+                                className="mr-1"
+                              />
+                              Default
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 ml-4">
+                        <button
+                          type="button"
+                          onClick={() => handleEditSizeRecipe(index)}
+                          className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg"
+                          title="Edit recipe for this size"
+                        >
+                          <ChefHat className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleCloneSize(index)}
+                          className="p-2 text-green-600 hover:bg-green-100 rounded-lg"
+                          title="Clone this size"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSize(index)}
+                          className="p-2 text-red-600 hover:bg-red-100 rounded-lg"
+                          title="Delete this size"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Recipe Information */}
+                    {size.recipe ? (
+                      <div className="bg-white rounded p-3 border border-gray-200">
+                        <div className="text-xs text-gray-600">
+                          <div className="grid grid-cols-3 gap-4">
+                            <p>
+                              <span className="font-medium">Recipe:</span> {size.recipe.name}
+                            </p>
+                            <p>
+                              <span className="font-medium">Ingredients:</span> {size.recipe.ingredients.length}
+                            </p>
+                            {size.recipe.prepTime && (
+                              <p>
+                                <span className="font-medium">Prep:</span> {size.recipe.prepTime}min
+                              </p>
+                            )}
+                          </div>
+                          {size.costPrice && (
+                            <div className="mt-2 pt-2 border-t border-gray-100">
+                              <p className="text-green-600">
+                                <span className="font-medium">Cost:</span> {formatPrice(size.costPrice)} |
+                                <span className="font-medium"> Margin:</span> {formatPrice(size.price - size.costPrice)}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-white rounded p-3 border border-gray-200 text-center">
+                        <p className="text-xs text-gray-500 mb-1">
+                          No recipe defined for this size
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleEditSizeRecipe(index)}
+                          className="text-xs text-blue-600 hover:text-blue-800"
+                        >
+                          Add Recipe
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                <ChefHat className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                <p className="text-sm">No sizes defined</p>
+                <p className="text-xs">Add different sizes with individual recipes and pricing</p>
+                <button
+                  type="button"
+                  onClick={handleAddSize}
+                  className="mt-3 text-xs text-blue-600 hover:text-blue-800"
+                >
+                  Add Your First Size
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Photos */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -433,6 +734,44 @@ export function AddMenuItemModal({ isOpen, onClose, onSuccess, categories }: Add
           </div>
         </form>
       </div>
+
+      {/* Recipe Editor Modal */}
+      {showRecipeEditor && (
+        <div className="fixed inset-0 z-60 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {editingSizeIndex !== null
+                  ? `Edit Recipe for Size ${formData.sizes[editingSizeIndex]?.size || ''}`
+                  : (formData.recipe ? 'Edit Recipe' : 'Add Recipe')
+                }
+              </h2>
+              <button
+                onClick={() => {
+                  setShowRecipeEditor(false)
+                  setEditingSizeIndex(null)
+                  setCurrentSizeRecipe(null)
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <RecipeEditor
+                recipe={editingSizeIndex !== null ? currentSizeRecipe : (formData.recipe?.baseRecipe || null)}
+                onSave={handleSaveRecipe}
+                onCancel={() => {
+                  setShowRecipeEditor(false)
+                  setEditingSizeIndex(null)
+                  setCurrentSizeRecipe(null)
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

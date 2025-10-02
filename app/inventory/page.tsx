@@ -5,10 +5,11 @@ import { DashboardLayout } from "@/components/dashboard-layout"
 import { InventoryItems } from "@/components/inventory-items"
 import { InventoryOptionGroups } from "@/components/inventory-option-groups"
 import { InventoryBulkUpdate } from "@/components/inventory-bulk-update"
+import { InventoryManagement } from "@/components/inventory-management"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 export default function InventoryPage() {
-  const [activeTab, setActiveTab] = useState("items")
+  const [activeTab, setActiveTab] = useState("ingredients")
 
   return (
     <DashboardLayout>
@@ -19,6 +20,12 @@ export default function InventoryPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="border-b bg-transparent p-0">
+            <TabsTrigger
+              value="ingredients"
+              className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
+            >
+              INGREDIENTS
+            </TabsTrigger>
             <TabsTrigger
               value="items"
               className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
@@ -38,6 +45,10 @@ export default function InventoryPage() {
               BULK UPDATE
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="ingredients" className="mt-6">
+            <InventoryManagement />
+          </TabsContent>
 
           <TabsContent value="items" className="mt-6">
             <InventoryItems />

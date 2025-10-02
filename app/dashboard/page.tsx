@@ -2,6 +2,7 @@
 
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { BusinessGlanceCard } from "@/components/business-glance-card"
+import { StockAlertsSummary } from "@/components/stock-alerts"
 import {
   Select,
   SelectContent,
@@ -47,6 +48,17 @@ export default function DashboardPage() {
 
         {/* Business at a Glance */}
         <BusinessGlanceCard />
+
+        {/* Stock Alerts Summary */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900">Inventory Status</h2>
+            <a href="/notifications" className="text-purple-600 hover:text-purple-700 text-sm font-medium">
+              View All Alerts
+            </a>
+          </div>
+          <StockAlertsSummary />
+        </div>
 
         {/* Business Insights Section */}
         <div className="bg-white rounded-lg p-6 shadow-sm border">
