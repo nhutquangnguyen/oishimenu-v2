@@ -24,7 +24,7 @@ function formatPrice(price: number): string {
 }
 
 export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetailModalProps) {
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isOptionGroupModalOpen, setIsOptionGroupModalOpen] = useState(false)
@@ -65,33 +65,24 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
         recipe: item.recipe || null,
         costPrice: item.costPrice || 0
       })
+      // Start in edit mode when a new item is selected
+      setIsEditing(true)
+      setError(null)
     }
   }, [item])
 
   if (!isOpen || !item) return null
 
-  const handleEdit = () => {
-    setIsEditing(true)
-    setError(null)
-  }
+  // Removed handleEdit function since we always start in edit mode
 
   const handleCancel = () => {
-    setIsEditing(false)
+    onClose() // Close the modal instead of just switching to view mode
+  }
+
+  const handleClose = () => {
+    setIsEditing(true) // Reset to edit mode for next time
     setError(null)
-    // Reset form data
-    setFormData({
-      name: item.name,
-      description: item.description || "",
-      price: item.price,
-      availableStatus: item.availableStatus,
-      availabilitySchedule: item.availabilitySchedule || "",
-      optionGroups: item.optionGroups || [],
-      sizes: item.sizes || [],
-      defaultSize: item.defaultSize || "",
-      // Legacy fields for backward compatibility
-      recipe: item.recipe || null,
-      costPrice: item.costPrice || 0
-    })
+    onClose()
   }
 
   const handleSave = async () => {
@@ -118,8 +109,8 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
       const success = await updateMenuItem(item.id, updates)
 
       if (success) {
-        setIsEditing(false)
         onSuccess() // Refresh the parent data
+        handleClose() // Close modal after successful save
       } else {
         setError("Failed to update item")
       }
@@ -148,7 +139,7 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
 
       if (success) {
         onSuccess() // Refresh the parent data
-        onClose()
+        handleClose()
       } else {
         setError("Failed to delete item")
       }
@@ -357,25 +348,14 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-gray-50 rounded-t-lg flex-shrink-0">
           <h2 className="text-lg font-semibold text-gray-900">
-            {isEditing ? 'EDIT ITEM' : 'ITEM DETAILS'}
+            EDIT ITEM
           </h2>
-          <div className="flex items-center gap-2">
-            {!isEditing && (
-              <button
-                onClick={handleEdit}
-                className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-                title="Edit item"
-              >
-                <Edit3 className="h-4 w-4" />
-              </button>
-            )}
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-            >
-              <X className="h-5 w-5 text-gray-600" />
-            </button>
-          </div>
+          <button
+            onClick={handleClose}
+            className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+          >
+            <X className="h-5 w-5 text-gray-600" />
+          </button>
         </div>
 
         {/* Content */}
@@ -793,49 +773,44 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
                 )}
               </div>
             </div>
+
+            {/* Delete Section */}
+            <div className="border-t pt-6">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-red-800 mb-2">Danger Zone</h3>
+                <p className="text-sm text-red-700 mb-4">
+                  Once you delete this item, there is no going back. Please be certain.
+                </p>
+                <button
+                  onClick={handleDelete}
+                  disabled={loading}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete Item Permanently
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Footer */}
         <div className="border-t p-4 bg-gray-50 rounded-b-lg flex-shrink-0">
           <div className="flex justify-end gap-3">
-            {isEditing ? (
-              <>
-                <button
-                  onClick={handleCancel}
-                  disabled={loading}
-                  className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={loading}
-                  className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? 'Saving...' : 'Save Changes'}
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={handleDelete}
-                  disabled={loading}
-                  className="flex items-center gap-2 px-6 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50 disabled:opacity-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </button>
-                <button
-                  onClick={handleEdit}
-                  disabled={loading}
-                  className="flex items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                >
-                  <Edit3 className="h-4 w-4" />
-                  Edit Item
-                </button>
-              </>
-            )}
+            <button
+              onClick={handleCancel}
+              disabled={loading}
+              className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={loading}
+              className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Saving...' : 'Save Changes'}
+            </button>
           </div>
         </div>
       </div>

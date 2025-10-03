@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useAuth } from "@/contexts/firebase-auth-context"
+import { useAuth } from "@/components/auth-provider"
 import { User, LogOut, Settings, ChevronDown } from "lucide-react"
 
 export function UserProfile() {

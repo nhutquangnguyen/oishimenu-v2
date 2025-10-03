@@ -26,7 +26,7 @@ import type { StockAlert } from "@/lib/types/inventory"
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Insights", href: "/insights", icon: TrendingUp },
-  { name: "Orders", href: "/dashboard/orders", icon: ShoppingBag },
+  { name: "Orders", href: "/orders", icon: ShoppingBag },
   { name: "POS", href: "/pos", icon: ShoppingCart },
   { name: "Feedback", href: "/feedback", icon: MessageSquare },
   { name: "Finance", href: "/finance", icon: DollarSign },

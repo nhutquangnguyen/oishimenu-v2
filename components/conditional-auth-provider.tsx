@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { FirebaseAuthProvider } from "@/contexts/firebase-auth-context"
+import { AuthProvider } from "@/components/auth-provider"
 
 export function ConditionalAuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -26,7 +26,7 @@ export function ConditionalAuthProvider({ children }: { children: React.ReactNod
   const needsAuth = authRoutes.some(route => pathname.startsWith(route))
 
   if (needsAuth) {
-    return <FirebaseAuthProvider>{children}</FirebaseAuthProvider>
+    return <AuthProvider>{children}</AuthProvider>
   }
 
   return <>{children}</>

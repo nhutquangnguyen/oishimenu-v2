@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useAuth } from "@/contexts/firebase-auth-context"
+import { useAuth } from "@/components/auth-provider"
 import Link from "next/link"
 import { Menu, AlertCircle, CheckCircle } from "lucide-react"
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Search, ChevronDown, MoreHorizontal, Loader2, Edit, ArrowUp, ArrowDown } from "lucide-react"
+import { Plus, Search, ChevronDown, MoreHorizontal, Loader2, Edit, ArrowUp, ArrowDown, Eye, EyeOff } from "lucide-react"
 import { ItemDetailModal } from "./item-detail-modal"
 import { AddMenuItemModal } from "./add-menu-item-modal"
 import { EditCategoryModal } from "./edit-category-modal"
@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { getMenuCategories, getMenuItems, updateCategoryOrders } from "@/lib/services/menu"
+import { getMenuCategories, getMenuItems, updateCategoryOrders, updateMenuItem } from "@/lib/services/menu"
 import type { MenuItem as FirebaseMenuItem, MenuCategory } from "@/lib/types/menu"
 
 interface DisplayMenuItem {
@@ -166,6 +166,28 @@ export function MenuOverview() {
       // Reload data to reset state
       loadMenuData()
     }
+  }
+
+  const handleStatusToggle = async (item: FirebaseMenuItem, event: React.MouseEvent) => {
+    event.stopPropagation() // Prevent opening the edit modal
+
+    try {
+      const newStatus = item.availableStatus === 'AVAILABLE' ? 'UNAVAILABLE' : 'AVAILABLE'
+      const success = await updateMenuItem(item.id, { availableStatus: newStatus })
+
+      if (success) {
+        await loadMenuData() // Refresh the data
+      } else {
+        console.error('Failed to update item status')
+      }
+    } catch (error) {
+      console.error('Error updating item status:', error)
+    }
+  }
+
+  const handleEditClick = (item: FirebaseMenuItem, event: React.MouseEvent) => {
+    event.stopPropagation() // Prevent any parent click handlers
+    setSelectedItem(item)
   }
 
   const moveCategoryDown = async (categoryIndex: number) => {
@@ -380,8 +402,7 @@ export function MenuOverview() {
               .map((item) => (
               <div
                 key={item.id}
-                onClick={() => setSelectedItem(item.firebaseData)}
-                className="flex items-center gap-3 rounded-lg border p-4 hover:bg-gray-50 cursor-pointer"
+                className="flex items-center gap-3 rounded-lg border p-4 hover:bg-gray-50 group"
               >
                 <div className="h-15 w-15 rounded-lg bg-gray-100 flex items-center justify-center">
                   <img
@@ -413,6 +434,32 @@ export function MenuOverview() {
                       {item.firebaseData.categoryName}
                     </span>
                   </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={(e) => handleStatusToggle(item.firebaseData, e)}
+                    className={`p-2 rounded-lg transition-colors ${
+                      item.firebaseData.availableStatus === 'AVAILABLE'
+                        ? 'text-red-600 hover:bg-red-100'
+                        : 'text-green-600 hover:bg-green-100'
+                    }`}
+                    title={item.firebaseData.availableStatus === 'AVAILABLE' ? 'Make unavailable' : 'Make available'}
+                  >
+                    {item.firebaseData.availableStatus === 'AVAILABLE' ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                  <button
+                    onClick={(e) => handleEditClick(item.firebaseData, e)}
+                    className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                    title="Edit item"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             ))}
