@@ -102,7 +102,7 @@ export function ItemDetailModal({ item, isOpen, onClose, onSuccess }: ItemDetail
         sizes: formData.sizes,
         defaultSize: formData.defaultSize,
         // Legacy fields for backward compatibility
-        recipe: formData.recipe,
+        recipe: formData.recipe || undefined,
         costPrice: formData.costPrice
       }
 

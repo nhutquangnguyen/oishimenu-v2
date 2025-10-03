@@ -431,13 +431,12 @@ export async function deductIngredientsFromRecipe(recipe: Recipe, servings: numb
       // Prepare transaction record
       transactions.push({
         ingredientId: ingredient.id,
-        ingredientName: ingredient.name,
-        type: 'usage',
+        type: 'usage' as const,
         quantity: totalQuantityNeeded,
         unit: ingredient.unit,
         reason: `Used in recipe: ${recipe.name}`,
         relatedOrderId: undefined, // Will be set by caller if available
-        performedBy: 'system'
+        createdBy: 'system'
       });
 
       // Check if ingredient is now below threshold

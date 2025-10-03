@@ -13,8 +13,8 @@ import {
   startAfter,
   Timestamp
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import type { Order, OrderFilter, OrderStats, OrderStatus } from '@/lib/types/order';
+import { getDb } from '@/lib/firebase';
+import type { Order, OrderFilter, OrderStats, OrderStatus, PaginatedOrdersResult } from '@/lib/types/order';
 
 /**
  * Generate a human-readable order number
@@ -36,6 +36,7 @@ function generateOrderNumber(): string {
  */
 export async function getOrders(filter?: OrderFilter): Promise<Order[]> {
   try {
+    const db = getDb();
     if (!db) {
       console.warn('Firestore not available, returning empty orders');
       return [];
@@ -77,8 +78,11 @@ export async function getOrders(filter?: OrderFilter): Promise<Order[]> {
       queryConstraints.push(where('platform', '==', filter.platform));
     }
 
-    // Default sorting by creation date (newest first)
-    queryConstraints.push(orderBy('createdAt', 'desc'));
+    // Only apply orderBy if no status filter (to avoid composite index requirement)
+    const hasStatusFilter = filter?.status && filter.status.length > 0;
+    if (!hasStatusFilter) {
+      queryConstraints.push(orderBy('createdAt', 'desc'));
+    }
 
     // Apply limit
     if (filter?.limit) {
@@ -91,15 +95,30 @@ export async function getOrders(filter?: OrderFilter): Promise<Order[]> {
 
     const snapshot = await getDocs(finalQuery);
 
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-      updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
-      confirmedAt: doc.data().confirmedAt?.toDate?.() || undefined,
-      readyAt: doc.data().readyAt?.toDate?.() || undefined,
-      deliveredAt: doc.data().deliveredAt?.toDate?.() || undefined,
-    } as Order));
+    let orders = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate?.() || new Date(),
+        updatedAt: data.updatedAt?.toDate?.() || new Date(),
+        confirmedAt: data.confirmedAt?.toDate?.() || undefined,
+        readyAt: data.readyAt?.toDate?.() || undefined,
+        deliveredAt: data.deliveredAt?.toDate?.() || undefined,
+      } as Order;
+    });
+
+    // Sort client-side if we have status filter (since we skipped orderBy to avoid index requirement)
+    if (hasStatusFilter) {
+      orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    }
+
+    // Apply limit client-side if we had status filter
+    if (hasStatusFilter && filter?.limit) {
+      orders = orders.slice(0, filter.limit);
+    }
+
+    return orders;
 
   } catch (error) {
     console.error('Error fetching orders:', error);
@@ -108,10 +127,136 @@ export async function getOrders(filter?: OrderFilter): Promise<Order[]> {
 }
 
 /**
+ * Fetch orders with pagination support
+ */
+export async function getOrdersPaginated(filter?: OrderFilter): Promise<PaginatedOrdersResult> {
+  try {
+    const db = getDb();
+    if (!db) {
+      console.warn('Firestore not available, returning empty orders');
+      return {
+        orders: [],
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          total: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrevious: false
+        }
+      };
+    }
+
+    const page = filter?.page || 1;
+    const pageSize = filter?.pageSize || 10;
+    const offset = ((page - 1) * pageSize);
+
+    let ordersQuery = collection(db, 'orders');
+    let queryConstraints: any[] = [];
+
+    // Apply filters (same as getOrders)
+    if (filter?.status && filter.status.length > 0) {
+      queryConstraints.push(where('status', 'in', filter.status));
+    }
+
+    if (filter?.orderType && filter.orderType.length > 0) {
+      queryConstraints.push(where('orderType', 'in', filter.orderType));
+    }
+
+    if (filter?.paymentStatus && filter.paymentStatus.length > 0) {
+      queryConstraints.push(where('paymentStatus', 'in', filter.paymentStatus));
+    }
+
+    if (filter?.dateFrom) {
+      queryConstraints.push(where('createdAt', '>=', Timestamp.fromDate(filter.dateFrom)));
+    }
+
+    if (filter?.dateTo) {
+      queryConstraints.push(where('createdAt', '<=', Timestamp.fromDate(filter.dateTo)));
+    }
+
+    if (filter?.customerPhone) {
+      queryConstraints.push(where('customer.phone', '==', filter.customerPhone));
+    }
+
+    if (filter?.orderNumber) {
+      queryConstraints.push(where('orderNumber', '==', filter.orderNumber));
+    }
+
+    if (filter?.platform) {
+      queryConstraints.push(where('platform', '==', filter.platform));
+    }
+
+    // Only apply orderBy if no status filter (to avoid composite index requirement)
+    const hasStatusFilter = filter?.status && filter.status.length > 0;
+    if (!hasStatusFilter) {
+      queryConstraints.push(orderBy('createdAt', 'desc'));
+    }
+
+    const finalQuery = queryConstraints.length > 0
+      ? query(ordersQuery, ...queryConstraints)
+      : query(ordersQuery, orderBy('createdAt', 'desc'));
+
+    const snapshot = await getDocs(finalQuery);
+
+    let allOrders = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate?.() || new Date(),
+        updatedAt: data.updatedAt?.toDate?.() || new Date(),
+        confirmedAt: data.confirmedAt?.toDate?.() || undefined,
+        readyAt: data.readyAt?.toDate?.() || undefined,
+        deliveredAt: data.deliveredAt?.toDate?.() || undefined,
+      } as Order;
+    });
+
+    // Sort client-side if we have status filter
+    if (hasStatusFilter) {
+      allOrders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    }
+
+    const total = allOrders.length;
+    const totalPages = Math.ceil(total / pageSize);
+
+    // Apply pagination
+    const orders = allOrders.slice(offset, offset + pageSize);
+
+    return {
+      orders,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrevious: page > 1
+      }
+    };
+
+  } catch (error) {
+    console.error('Error fetching paginated orders:', error);
+    return {
+      orders: [],
+      pagination: {
+        page: 1,
+        pageSize: 10,
+        total: 0,
+        totalPages: 0,
+        hasNext: false,
+        hasPrevious: false
+      }
+    };
+  }
+}
+
+/**
  * Get a single order by ID
  */
 export async function getOrder(id: string): Promise<Order | null> {
   try {
+    const db = getDb();
     if (!db) {
       console.warn('Firestore not available');
       return null;
@@ -142,8 +287,34 @@ export async function getOrder(id: string): Promise<Order | null> {
 /**
  * Create a new order
  */
+/**
+ * Clean object by removing undefined values recursively
+ */
+function cleanObject(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(cleanObject);
+  }
+
+  if (typeof obj === 'object') {
+    const cleaned: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== undefined) {
+        cleaned[key] = cleanObject(value);
+      }
+    }
+    return cleaned;
+  }
+
+  return obj;
+}
+
 export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'updatedAt'>): Promise<string | null> {
   try {
+    const db = getDb();
     if (!db) {
       throw new Error('Firestore not available');
     }
@@ -151,8 +322,11 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
     const orderNumber = generateOrderNumber();
     const now = new Date();
 
+    // Clean the order data to remove undefined values
+    const cleanedOrderData = cleanObject(orderData);
+
     const order = {
-      ...orderData,
+      ...cleanedOrderData,
       orderNumber,
       createdAt: now,
       updatedAt: now,
@@ -171,6 +345,7 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
  */
 export async function updateOrder(id: string, updates: Partial<Order>): Promise<boolean> {
   try {
+    const db = getDb();
     if (!db) {
       throw new Error('Firestore not available');
     }
@@ -193,6 +368,7 @@ export async function updateOrder(id: string, updates: Partial<Order>): Promise<
  */
 export async function updateOrderStatus(id: string, status: OrderStatus, updatedBy?: string): Promise<boolean> {
   try {
+    const db = getDb();
     if (!db) {
       throw new Error('Firestore not available');
     }
@@ -273,6 +449,7 @@ async function processInventoryDeductionForOrder(orderId: string): Promise<void>
  */
 export async function deleteOrder(id: string): Promise<boolean> {
   try {
+    const db = getDb();
     if (!db) {
       throw new Error('Firestore not available');
     }

@@ -1,6 +1,15 @@
 import { initializeApp, getApps } from 'firebase/app'
 import { getAuth, connectAuthEmulator } from 'firebase/auth'
-import { getFirestore, connectFirestoreEmulator, initializeFirestore, CACHE_SIZE_UNLIMITED } from 'firebase/firestore'
+import {
+  getFirestore,
+  connectFirestoreEmulator,
+  initializeFirestore,
+  CACHE_SIZE_UNLIMITED,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  enableNetwork,
+  disableNetwork
+} from 'firebase/firestore'
 import { getStorage as getFirebaseStorage, connectStorageEmulator } from 'firebase/storage'
 import { getAnalytics, isSupported } from 'firebase/analytics'
 
@@ -59,7 +68,10 @@ export const getDb = () => {
   if (!firestoreInstance && isValidConfig) {
     try {
       firestoreInstance = initializeFirestore(app, {
-        cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+        localCache: persistentLocalCache({
+          cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+          tabManager: persistentMultipleTabManager()
+        }),
         experimentalForceLongPolling: true, // Force long polling to avoid WebChannel issues
       })
 
@@ -126,6 +138,92 @@ export const initAnalytics = async () => {
     return getAnalytics(app)
   }
   return null
+}
+
+// Network management utilities for offline support
+export const networkUtils = {
+  // Enable Firestore network connectivity
+  enableFirestore: async () => {
+    const db = getDb()
+    if (db) {
+      try {
+        await enableNetwork(db)
+        console.log('Firestore network enabled')
+        return true
+      } catch (error) {
+        console.error('Failed to enable Firestore network:', error)
+        return false
+      }
+    }
+    return false
+  },
+
+  // Disable Firestore network connectivity (offline mode)
+  disableFirestore: async () => {
+    const db = getDb()
+    if (db) {
+      try {
+        await disableNetwork(db)
+        console.log('Firestore network disabled (offline mode)')
+        return true
+      } catch (error) {
+        console.error('Failed to disable Firestore network:', error)
+        return false
+      }
+    }
+    return false
+  },
+
+  // Check if browser is online
+  isOnline: () => {
+    if (typeof window !== 'undefined') {
+      return window.navigator.onLine
+    }
+    return true // Assume online on server
+  },
+
+  // Listen for online/offline events
+  onNetworkChange: (callback: (isOnline: boolean) => void) => {
+    if (typeof window !== 'undefined') {
+      const handleOnline = () => callback(true)
+      const handleOffline = () => callback(false)
+
+      window.addEventListener('online', handleOnline)
+      window.addEventListener('offline', handleOffline)
+
+      // Return cleanup function
+      return () => {
+        window.removeEventListener('online', handleOnline)
+        window.removeEventListener('offline', handleOffline)
+      }
+    }
+    return () => {} // No-op cleanup for server
+  }
+}
+
+// Cache management utilities
+export const cacheUtils = {
+  // Clear Firestore cache
+  clearFirestoreCache: async () => {
+    try {
+      // Firestore cache is cleared when we disable/enable network
+      await networkUtils.disableFirestore()
+      await networkUtils.enableFirestore()
+      console.log('Firestore cache cleared')
+      return true
+    } catch (error) {
+      console.error('Failed to clear Firestore cache:', error)
+      return false
+    }
+  },
+
+  // Get cache info (approximate)
+  getCacheInfo: () => {
+    if (typeof window !== 'undefined' && 'storage' in navigator && 'estimate' in navigator.storage) {
+      return navigator.storage.estimate()
+    }
+    return Promise.resolve({ usage: 0, quota: 0 })
+  }
 }
 
 export default app

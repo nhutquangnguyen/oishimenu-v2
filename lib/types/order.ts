@@ -114,6 +114,9 @@ export interface OrderFilter {
   orderNumber?: string
   platform?: string
   limit?: number
+  offset?: number
+  page?: number
+  pageSize?: number
 }
 
 export interface OrderStats {
@@ -127,6 +130,18 @@ export interface OrderStats {
     quantity: number
     revenue: number
   }>
+}
+
+export interface PaginatedOrdersResult {
+  orders: Order[]
+  pagination: {
+    page: number
+    pageSize: number
+    total: number
+    totalPages: number
+    hasNext: boolean
+    hasPrevious: boolean
+  }
 }
 
 // For real-time order tracking

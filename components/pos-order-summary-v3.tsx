@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { Plus, Minus, Trash2, ShoppingCart, Phone, MapPin, CreditCard, User, Check, Edit } from "lucide-react"
 import { OrderItem } from "@/app/pos/page"
+import { TableSelector } from "./table-selector"
+import type { Table } from "@/lib/types/table"
 
 interface POSOrderSummaryV3Props {
   items: OrderItem[]
@@ -32,6 +34,7 @@ export function POSOrderSummaryV3({
   const [customerLocked, setCustomerLocked] = useState(false)
   const [orderSource, setOrderSource] = useState<OrderSource | null>(null)
   const [sourceLocked, setSourceLocked] = useState(false)
+  const [selectedTable, setSelectedTable] = useState<Table | null>(null)
   const [orderDetails, setOrderDetails] = useState({
     discount: "",
     paymentMethod: "cash",
@@ -102,6 +105,7 @@ export function POSOrderSummaryV3({
       items,
       customer,
       source: orderSource,
+      selectedTable,
       ...orderDetails,
       subtotal,
       discount,
@@ -115,6 +119,7 @@ export function POSOrderSummaryV3({
     setCustomerLocked(false)
     setOrderSource(null)
     setSourceLocked(false)
+    setSelectedTable(null)
     setOrderDetails({
       discount: "",
       paymentMethod: "cash",
@@ -440,15 +445,12 @@ export function POSOrderSummaryV3({
 
                 {orderSource === "dine-in" && (
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Table Number
-                    </label>
-                    <input
-                      type="text"
-                      value={orderDetails.tableNumber}
-                      onChange={(e) => setOrderDetails({...orderDetails, tableNumber: e.target.value})}
-                      placeholder="Enter table number"
-                      className="w-full px-2 py-1.5 border rounded text-sm focus:border-purple-500 focus:outline-none"
+                    <TableSelector
+                      selectedTableId={selectedTable?.id}
+                      onTableSelect={(table) => {
+                        setSelectedTable(table)
+                        setOrderDetails({...orderDetails, tableNumber: table?.name || ""})
+                      }}
                     />
                   </div>
                 )}
@@ -531,6 +533,19 @@ export function POSOrderSummaryV3({
 
   return (
     <div className="h-full flex flex-col bg-white">
+      {/* Mobile header */}
+      <div className="lg:hidden border-b border-gray-200 p-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">Order Summary</h2>
+          <div className="flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5 text-purple-600" />
+            <span className="text-sm font-medium text-purple-600">
+              {items.length} {items.length === 1 ? 'item' : 'items'}
+            </span>
+          </div>
+        </div>
+      </div>
+
       <div className="flex-1 overflow-auto">
         {renderItemsSection()}
         {renderCustomerSection()}

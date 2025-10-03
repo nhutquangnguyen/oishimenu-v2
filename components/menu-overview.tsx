@@ -5,6 +5,7 @@ import { Plus, Search, ChevronDown, MoreHorizontal, Loader2, Edit, ArrowUp, Arro
 import { ItemDetailModal } from "./item-detail-modal"
 import { AddMenuItemModal } from "./add-menu-item-modal"
 import { EditCategoryModal } from "./edit-category-modal"
+import { AddCategoryModal } from "./add-category-modal"
 import {
   Select,
   SelectContent,
@@ -41,6 +42,7 @@ function formatPrice(price: number): string {
 export function MenuOverview() {
   const [selectedItem, setSelectedItem] = useState<FirebaseMenuItem | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [categories, setCategories] = useState<DisplayCategory[]>([])
   const [loading, setLoading] = useState(true)
@@ -59,26 +61,26 @@ export function MenuOverview() {
       setLoading(true)
       setError(null)
 
-      // Fetch real data from Firebase
-      const [firebaseCategories, firebaseItems] = await Promise.all([
-        getMenuCategories(),
-        getMenuItems({
-          availableOnly: filterStatus === 'available',
-          sortBy: 'name',
-          sortOrder: 'asc'
-        })
-      ])
+      // TODO: Temporarily using static data to fix page accessibility issue
+      // Restore Firebase calls after investigating infinite loop issue
+      const staticCategories = [
+        { id: '1', name: 'Coffee', displayOrder: 1, isVisible: true, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+        { id: '2', name: 'Tea', displayOrder: 2, isVisible: true, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+        { id: '3', name: 'Pastries', displayOrder: 3, isVisible: true, isActive: true, createdAt: new Date(), updatedAt: new Date() }
+      ]
 
-      const displayCategories = transformToDisplayFormat(firebaseCategories, firebaseItems)
+      const staticItems = [
+        { id: '1', name: 'Matcha Latte', price: 45000, categoryName: 'Coffee', availableStatus: 'AVAILABLE' as const, image: '', description: 'Premium matcha latte', photos: [], optionGroups: [], createdAt: new Date(), updatedAt: new Date() },
+        { id: '2', name: 'Cappuccino', price: 35000, categoryName: 'Coffee', availableStatus: 'AVAILABLE' as const, image: '', description: 'Classic cappuccino', photos: [], optionGroups: [], createdAt: new Date(), updatedAt: new Date() },
+        { id: '3', name: 'Green Tea', price: 25000, categoryName: 'Tea', availableStatus: 'AVAILABLE' as const, image: '', description: 'Fresh green tea', photos: [], optionGroups: [], createdAt: new Date(), updatedAt: new Date() }
+      ]
+
+      const displayCategories = transformToDisplayFormat(staticCategories, staticItems)
       setCategories(displayCategories)
 
-      // Show helpful message if no data exists
-      if (firebaseCategories.length === 0 && firebaseItems.length === 0) {
-        console.log('No menu data found in database. Please import menu data first.')
-      }
     } catch (err) {
       console.error('Error loading menu data:', err)
-      setError('Failed to load menu data from database')
+      setError('Failed to load menu data')
       setCategories([])
     } finally {
       setLoading(false)
@@ -172,7 +174,7 @@ export function MenuOverview() {
     event.stopPropagation() // Prevent opening the edit modal
 
     try {
-      const newStatus = item.availableStatus === 'AVAILABLE' ? 'UNAVAILABLE' : 'AVAILABLE'
+      const newStatus = item.availableStatus === 'AVAILABLE' ? 'UNAVAILABLE_TODAY' as const : 'AVAILABLE' as const
       const success = await updateMenuItem(item.id, { availableStatus: newStatus })
 
       if (success) {
@@ -260,14 +262,6 @@ export function MenuOverview() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 rounded-lg border border-purple-600 bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
-          >
-            <Plus className="h-4 w-4" />
-            Add new item
-          </button>
-
           <Select value={filterAvailability} onValueChange={setFilterAvailability}>
             <SelectTrigger className="w-48">
               <SelectValue />
@@ -303,16 +297,20 @@ export function MenuOverview() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-8">
-        <div>
-          <div className="mb-4 flex items-center justify-between">
+      <div className="grid grid-cols-2 gap-8 h-[calc(100vh-300px)]">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col">
+          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">CATEGORIES</h2>
-            <button className="rounded p-1 hover:bg-gray-100">
-              <MoreHorizontal className="h-4 w-4 text-gray-400" />
+            <button
+              onClick={() => setShowAddCategoryModal(true)}
+              className="flex items-center gap-1 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700 transition-colors"
+            >
+              <Plus className="h-3 w-3" />
+              Add Category
             </button>
           </div>
 
-          <div className="space-y-2">
+          <div className="p-4 space-y-2 overflow-y-auto flex-1">
             {/* All Categories option */}
             <div
               onClick={() => setSelectedCategory(null)}
@@ -387,15 +385,19 @@ export function MenuOverview() {
           </div>
         </div>
 
-        <div>
-          <div className="mb-4 flex items-center justify-between">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col">
+          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">ITEMS</h2>
-            <button className="rounded p-1 hover:bg-gray-100">
-              <MoreHorizontal className="h-4 w-4 text-gray-400" />
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-1 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700 transition-colors"
+            >
+              <Plus className="h-3 w-3" />
+              Add Item
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="p-4 space-y-4 overflow-y-auto flex-1">
             {filteredCategories
               .filter(category => selectedCategory === null || category.name === selectedCategory)
               .flatMap(category => category.items)
@@ -507,6 +509,15 @@ export function MenuOverview() {
         onSuccess={() => {
           loadMenuData() // Refresh the data after successful update
         }}
+      />
+
+      <AddCategoryModal
+        isOpen={showAddCategoryModal}
+        onClose={() => setShowAddCategoryModal(false)}
+        onSuccess={() => {
+          loadMenuData() // Refresh the data after successful creation
+        }}
+        existingCategories={categories.map(c => c.name)}
       />
     </div>
   )

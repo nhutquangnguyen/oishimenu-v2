@@ -61,12 +61,13 @@ export default function POSPage() {
     try {
       // Create order with real Firebase data
       const { createOrder } = await import('@/lib/services/order')
+      const { updateTableStatus } = await import('@/lib/services/table')
 
       const orderData = {
         customer: {
-          name: orderDetails.customerName || 'Walk-in Customer',
-          phone: orderDetails.customerPhone || '',
-          email: orderDetails.customerEmail
+          name: orderDetails.customer?.name || 'Walk-in Customer',
+          phone: orderDetails.customer?.phone || '',
+          email: orderDetails.customer?.email || ''
         },
         items: orderItems.map(item => ({
           id: `item-${Date.now()}-${Math.random()}`,
@@ -77,17 +78,17 @@ export default function POSPage() {
           selectedOptions: item.selectedOptions || [],
           subtotal: item.price * item.quantity
         })),
-        subtotal: orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        subtotal: orderDetails.subtotal || orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
         deliveryFee: 0,
         discount: orderDetails.discount || 0,
-        tax: Math.round(orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0) * 0.1),
-        total: orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0) * 1.1 - (orderDetails.discount || 0),
-        orderType: orderDetails.orderType || 'DINE_IN',
-        status: 'CONFIRMED',
-        notes: orderDetails.notes,
-        tableNumber: orderDetails.tableNumber,
-        paymentMethod: orderDetails.paymentMethod || 'CASH',
-        paymentStatus: 'PAID',
+        tax: Math.round((orderDetails.subtotal || orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)) * 0.1),
+        total: orderDetails.total || ((orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0) * 1.1) - (orderDetails.discount || 0)),
+        orderType: orderDetails.source === 'dine-in' ? 'DINE_IN' as const : orderDetails.source === 'takeaway' ? 'TAKEAWAY' as const : 'DINE_IN' as const,
+        status: 'CONFIRMED' as const,
+        notes: orderDetails.notes || '',
+        tableNumber: orderDetails.selectedTable?.name || orderDetails.tableNumber || '',
+        paymentMethod: (orderDetails.paymentMethod || 'CASH') as any,
+        paymentStatus: 'PAID' as const,
         platform: 'direct'
       }
 
@@ -95,6 +96,17 @@ export default function POSPage() {
 
       if (orderId) {
         console.log("Order created successfully with ID:", orderId)
+
+        // Update table status if dine-in order with selected table
+        if (orderDetails.source === 'dine-in' && orderDetails.selectedTable) {
+          try {
+            await updateTableStatus(orderDetails.selectedTable.id, 'OCCUPIED', orderId)
+            console.log("Table status updated to OCCUPIED")
+          } catch (error) {
+            console.error("Failed to update table status:", error)
+          }
+        }
+
         setOrderItems([])
         // Could show success message here
       } else {
@@ -109,11 +121,14 @@ export default function POSPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex h-[calc(100vh-4rem)]">
-        <div className="flex-1 p-6 overflow-auto">
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] lg:h-[calc(100vh-0rem)]">
+        {/* Menu Grid - Full height on mobile, flexible on desktop */}
+        <div className="flex-1 p-3 lg:p-6 overflow-auto">
           <POSMenuGrid onAddItem={handleAddItem} />
         </div>
-        <div className="w-96 border-l bg-white">
+
+        {/* Order Summary - Collapsible on mobile, fixed width on desktop */}
+        <div className="w-full lg:w-96 border-t lg:border-t-0 lg:border-l bg-white">
           <POSOrderSummaryV3
             items={orderItems}
             onUpdateQuantity={handleUpdateQuantity}

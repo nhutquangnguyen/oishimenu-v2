@@ -9,8 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { getOrders, updateOrderStatus, getOrderStats } from "@/lib/services/order"
-import type { Order as FirebaseOrder, OrderStatus } from "@/lib/types/order"
+import { getOrdersPaginated, updateOrderStatus, getOrderStats } from "@/lib/services/order"
+import type { Order as FirebaseOrder, OrderStatus, PaginatedOrdersResult } from "@/lib/types/order"
+import { Pagination, PaginationInfo } from "@/components/pagination"
 
 interface OrdersTableProps {
   status: "preparing" | "ready" | "upcoming" | "history"
@@ -36,14 +37,24 @@ export function OrdersTable({ status, showReceiptFilter, viewMode }: OrdersTable
   const [loading, setLoading] = useState(true)
   const [orderStats, setOrderStats] = useState<OrderStats | null>(null)
   const [selectedOrder, setSelectedOrder] = useState<FirebaseOrder | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize] = useState(10)
+  const [paginationInfo, setPaginationInfo] = useState<PaginatedOrdersResult['pagination'] | null>(null)
+
+  useEffect(() => {
+    setCurrentPage(1) // Reset to page 1 when status changes
+    loadOrders()
+  }, [status])
 
   useEffect(() => {
     loadOrders()
-  }, [status])
+  }, [currentPage])
 
   async function loadOrders() {
     try {
       setLoading(true)
+      setError(null)
 
       let orderStatus: OrderStatus[] = []
 
@@ -62,12 +73,14 @@ export function OrdersTable({ status, showReceiptFilter, viewMode }: OrdersTable
           break
       }
 
-      const fetchedOrders = await getOrders({
+      const result = await getOrdersPaginated({
         status: orderStatus,
-        limit: 50
+        page: currentPage,
+        pageSize: pageSize
       })
 
-      setOrders(fetchedOrders)
+      setOrders(result.orders)
+      setPaginationInfo(result.pagination)
 
       // If showing history, also get stats
       if (status === 'history') {
@@ -87,6 +100,7 @@ export function OrdersTable({ status, showReceiptFilter, viewMode }: OrdersTable
       }
     } catch (error) {
       console.error('Error loading orders:', error)
+      setError('Failed to load orders. Please check your connection and try again.')
     } finally {
       setLoading(false)
     }
@@ -100,7 +114,7 @@ export function OrdersTable({ status, showReceiptFilter, viewMode }: OrdersTable
         loadOrders()
       }
     } catch (error) {
-      console.error('Error updating order status:', error)
+      console.error('Error updating order status:', error, { orderId, newStatus })
     }
   }
 
@@ -162,7 +176,7 @@ export function OrdersTable({ status, showReceiptFilter, viewMode }: OrdersTable
         <h3 className="text-lg font-semibold text-gray-900">Summary</h3>
         <p className="text-sm text-gray-600">{dateFilter}</p>
       </div>
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         <div>
           <p className="text-sm text-gray-600">Net sales</p>
           <p className="text-2xl font-bold text-gray-900">
@@ -211,25 +225,25 @@ export function OrdersTable({ status, showReceiptFilter, viewMode }: OrdersTable
           <table className="w-full">
             <thead>
               <tr className="border-b bg-gray-50">
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 whitespace-nowrap">
                   ORDER NUMBER
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 whitespace-nowrap">
                   CUSTOMER
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 whitespace-nowrap">
                   ITEMS
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 whitespace-nowrap">
                   TOTAL AMOUNT
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 whitespace-nowrap">
                   STATUS
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 whitespace-nowrap">
                   DATE
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 whitespace-nowrap">
                   ACTIONS
                 </th>
               </tr>
@@ -237,16 +251,16 @@ export function OrdersTable({ status, showReceiptFilter, viewMode }: OrdersTable
             <tbody>
               {orders.map((order) => (
                 <tr key={order.id} className="border-b hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                  <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
                     {order.orderNumber}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-3 sm:px-6 py-4 text-sm text-gray-900">
                     <div>
                       <div className="font-medium">{order.customer.name}</div>
                       <div className="text-gray-500">{order.customer.phone}</div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-3 sm:px-6 py-4 text-sm text-gray-900">
                     <div className="space-y-1">
                       {order.items.slice(0, 2).map((item, index) => (
                         <div key={index} className="text-xs">
@@ -260,7 +274,7 @@ export function OrdersTable({ status, showReceiptFilter, viewMode }: OrdersTable
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                  <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
                     {formatCurrency(order.total)}
                   </td>
                   <td className="px-6 py-4">
@@ -290,65 +304,179 @@ export function OrdersTable({ status, showReceiptFilter, viewMode }: OrdersTable
           </table>
         </div>
       )}
+      {/* Pagination Controls for History */}
+      {paginationInfo && paginationInfo.totalPages > 1 && (
+        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <PaginationInfo
+              currentPage={paginationInfo.page}
+              pageSize={paginationInfo.pageSize}
+              total={paginationInfo.total}
+            />
+            <Pagination
+              currentPage={paginationInfo.page}
+              totalPages={paginationInfo.totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 
   const renderStandardTable = () => (
     <div className="rounded-lg bg-white shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b bg-gray-50">
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
-                ORDER ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
-                TOTAL AMOUNT
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
-                ITEMS
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
-                DRIVER
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
-                PICKUP IN
-              </th>
-              <th className="px-6 py-3 text-left">
-                <button
-                  onClick={showReceiptFilter}
-                  className="flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-gray-600 hover:text-gray-900"
-                >
-                  RECEIPT
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
-                ORDER READY?
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* Empty state will be rendered */}
-          </tbody>
-        </table>
-      </div>
-      {renderEmptyState()}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+          <span className="ml-2 text-gray-600">Loading orders...</span>
+        </div>
+      ) : orders.length === 0 ? (
+        renderEmptyState()
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b bg-gray-50">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
+                  ORDER NUMBER
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
+                  CUSTOMER
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
+                  TOTAL AMOUNT
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
+                  ITEMS
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
+                  STATUS
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
+                  TIME
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600">
+                  ACTIONS
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order.id} className="border-b hover:bg-gray-50">
+                  <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                    {order.orderNumber}
+                  </td>
+                  <td className="px-3 sm:px-6 py-4 text-sm text-gray-900">
+                    <div>
+                      <div className="font-medium">{order.customer.name}</div>
+                      <div className="text-gray-500">{order.customer.phone}</div>
+                    </div>
+                  </td>
+                  <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                    {formatCurrency(order.total)}
+                  </td>
+                  <td className="px-3 sm:px-6 py-4 text-sm text-gray-900">
+                    <div className="space-y-1">
+                      {order.items.slice(0, 2).map((item, index) => (
+                        <div key={index} className="text-xs">
+                          {item.quantity}x {item.menuItemName}
+                        </div>
+                      ))}
+                      {order.items.length > 2 && (
+                        <div className="text-xs text-gray-500">
+                          +{order.items.length - 2} more items
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="space-y-2">
+                      <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(order.status)}`}>
+                        {getStatusText(order.status)}
+                      </span>
+                      {/* Status update dropdown */}
+                      <div>
+                        <Select onValueChange={(newStatus) => handleStatusChange(order.id, newStatus as OrderStatus)}>
+                          <SelectTrigger className="w-32 h-7 text-xs">
+                            <SelectValue placeholder="Update Status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {status === 'preparing' && (
+                              <>
+                                <SelectItem value="PREPARING">Mark Preparing</SelectItem>
+                                <SelectItem value="READY">Mark Ready</SelectItem>
+                              </>
+                            )}
+                            {status === 'ready' && (
+                              <>
+                                <SelectItem value="OUT_FOR_DELIVERY">Out for Delivery</SelectItem>
+                                <SelectItem value="DELIVERED">Mark Delivered</SelectItem>
+                              </>
+                            )}
+                            {status === 'upcoming' && (
+                              <>
+                                <SelectItem value="CONFIRMED">Confirm Order</SelectItem>
+                                <SelectItem value="CANCELLED">Cancel Order</SelectItem>
+                              </>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {order.createdAt.toLocaleTimeString('vi-VN', {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </td>
+                  <td className="px-6 py-4">
+                    <button
+                      onClick={() => setSelectedOrder(order)}
+                      className="text-purple-600 hover:text-purple-900"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {/* Pagination Controls for Standard Table */}
+      {paginationInfo && paginationInfo.totalPages > 1 && (
+        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <PaginationInfo
+              currentPage={paginationInfo.page}
+              pageSize={paginationInfo.pageSize}
+              total={paginationInfo.total}
+            />
+            <Pagination
+              currentPage={paginationInfo.page}
+              totalPages={paginationInfo.totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 
   if (status === "history") {
     return (
       <div className="space-y-6">
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <input
             type="text"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            className="flex-1 sm:flex-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
           />
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-full sm:w-32">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

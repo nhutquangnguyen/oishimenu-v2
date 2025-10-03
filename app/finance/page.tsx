@@ -7,13 +7,13 @@ import { TrendingUp, DollarSign, CreditCard, PieChart } from "lucide-react"
 export default function FinancePage() {
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Finance</h1>
           <p className="text-gray-600">Manage your financial reports and analytics</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -67,7 +67,7 @@ export default function FinancePage() {
           </Card>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>Financial Reports</CardTitle>

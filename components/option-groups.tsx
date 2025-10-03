@@ -320,7 +320,7 @@ export function OptionGroups() {
       handleUpdateOption(groupIndex, optionIndex, {
         name: name,
         price: calculatedPrice,
-        recipe: recipe
+        recipe: recipe || undefined
       })
 
       setShowOptionEditor(false)

@@ -238,7 +238,7 @@ export function BulkUpdate() {
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = '.csv'
-    input.onchange = handleBulkUpload
+    input.onchange = (e) => handleBulkUpload(e as any)
     input.click()
   }
 

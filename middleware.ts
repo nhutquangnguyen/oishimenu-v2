@@ -32,6 +32,7 @@ export function middleware(request: NextRequest) {
         url.pathname.startsWith('/insights') ||
         url.pathname.startsWith('/orders') ||
         url.pathname.startsWith('/pos') ||
+        url.pathname.startsWith('/tables') ||
         url.pathname.startsWith('/feedback') ||
         url.pathname.startsWith('/menu') ||
         url.pathname.startsWith('/inventory') ||
@@ -62,6 +63,7 @@ export function middleware(request: NextRequest) {
         url.pathname.startsWith('/insights') ||
         url.pathname.startsWith('/orders') ||
         url.pathname.startsWith('/pos') ||
+        url.pathname.startsWith('/tables') ||
         url.pathname.startsWith('/feedback') ||
         url.pathname.startsWith('/menu') ||
         url.pathname.startsWith('/inventory') ||

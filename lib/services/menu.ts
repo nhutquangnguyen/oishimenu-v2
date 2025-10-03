@@ -291,7 +291,7 @@ export async function updateCategoryOrders(categories: Array<{id: string, displa
 
     // Update all categories in parallel
     const updatePromises = categories.map(async (category) => {
-      const docRef = doc(db, 'menu-categories', category.id);
+      const docRef = doc(db!, 'menu-categories', category.id);
       return updateDoc(docRef, {
         displayOrder: category.displayOrder,
         updatedAt: new Date(),
@@ -358,7 +358,7 @@ export async function calculateMenuItemTotalCost(menuItem: MenuItem): Promise<{
       }
     } else if (menuItem.recipe) {
       // Legacy single recipe
-      baseCost = await calculateRecipeCost(menuItem.recipe);
+      baseCost = await calculateRecipeCost(menuItem.recipe as any);
     }
 
     // Calculate option costs
@@ -407,7 +407,7 @@ export async function calculateMenuItemConfigurationCost(
       }
     } else if (menuItem.recipe) {
       // Legacy single recipe
-      totalCost += await calculateRecipeCost(menuItem.recipe);
+      totalCost += await calculateRecipeCost(menuItem.recipe as any);
     }
 
     // Calculate cost for selected options

@@ -1,11 +1,7 @@
 "use client"
 
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { MenuOverview } from "@/components/menu-overview"
-import { OptionGroups } from "@/components/option-groups"
-import { BulkUpdate } from "@/components/bulk-update"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Plus, Search } from "lucide-react"
 
 export default function MenuPage() {
   return (
@@ -16,44 +12,38 @@ export default function MenuPage() {
             <ArrowLeft className="h-5 w-5" />
           </button>
           <h1 className="text-2xl font-bold text-gray-900">
-            Dinh Barista - Coffee & Tea - 46A Đường số 22
+            Menu Management
           </h1>
         </div>
 
-        <Tabs defaultValue="menu-overview" className="w-full">
-          <TabsList className="mb-6 border-b bg-transparent p-0">
-            <TabsTrigger
-              value="menu-overview"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
-            >
-              MENU OVERVIEW
-            </TabsTrigger>
-            <TabsTrigger
-              value="option-groups"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
-            >
-              OPTION GROUPS
-            </TabsTrigger>
-            <TabsTrigger
-              value="bulk-update"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
-            >
-              BULK UPDATE
-            </TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Menu Items</h2>
+              <button className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                <Plus className="h-4 w-4" />
+                Add Item
+              </button>
+            </div>
 
-          <TabsContent value="menu-overview">
-            <MenuOverview />
-          </TabsContent>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Search className="h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search menu items..."
+                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
 
-          <TabsContent value="option-groups">
-            <OptionGroups />
-          </TabsContent>
-
-          <TabsContent value="bulk-update">
-            <BulkUpdate />
-          </TabsContent>
-        </Tabs>
+              <div className="text-center py-8 text-gray-500">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Menu Management</h3>
+                <p>This page is temporarily simplified while we fix system issues.</p>
+                <p className="text-sm mt-2">Full menu management functionality will be restored soon.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   )

@@ -14,6 +14,7 @@ export function ConditionalAuthProvider({ children }: { children: React.ReactNod
     '/insights',
     '/orders',
     '/pos',
+    '/tables',
     '/feedback',
     '/menu',
     '/inventory',

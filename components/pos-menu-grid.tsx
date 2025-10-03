@@ -7,6 +7,7 @@ import type { MenuItem as FirebaseMenuItem, MenuCategory } from "@/lib/types/men
 
 interface POSMenuItem {
   id: string
+  menuItemId: string
   name: string
   price: number
   category: string
@@ -54,11 +55,16 @@ export function POSMenuGrid({ onAddItem }: POSMenuGridProps) {
         })
       ])
 
-      setCategories(firebaseCategories)
+      // Remove duplicates by category name
+      const uniqueCategories = firebaseCategories.filter((category, index, self) =>
+        index === self.findIndex(c => c.name === category.name)
+      )
+      setCategories(uniqueCategories)
 
       // Transform Firebase menu items to POS format
       const posMenuItems: POSMenuItem[] = firebaseItems.map(item => ({
         id: item.id,
+        menuItemId: item.id,
         name: item.name,
         price: item.price,
         category: item.categoryName,
@@ -82,13 +88,16 @@ export function POSMenuGrid({ onAddItem }: POSMenuGridProps) {
   })
 
   const getGridClass = () => {
+    // Mobile-first responsive grid
+    const baseClasses = "grid-cols-2 sm:grid-cols-3"
+
     switch (itemsPerRow) {
-      case 2: return "grid-cols-2"
-      case 3: return "grid-cols-3"
-      case 4: return "grid-cols-4"
-      case 5: return "grid-cols-5"
-      case 6: return "grid-cols-6"
-      default: return "grid-cols-4"
+      case 2: return `${baseClasses} lg:grid-cols-2`
+      case 3: return `${baseClasses} lg:grid-cols-3`
+      case 4: return `${baseClasses} lg:grid-cols-4`
+      case 5: return `${baseClasses} lg:grid-cols-5`
+      case 6: return `${baseClasses} lg:grid-cols-6`
+      default: return `${baseClasses} lg:grid-cols-4`
     }
   }
 
@@ -120,7 +129,7 @@ export function POSMenuGrid({ onAddItem }: POSMenuGridProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input
@@ -131,8 +140,8 @@ export function POSMenuGrid({ onAddItem }: POSMenuGridProps) {
             className="w-full rounded-lg border border-gray-300 pl-10 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Items per row:</label>
+        <div className="hidden sm:flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Items per row:</label>
           <select
             value={itemsPerRow}
             onChange={(e) => setItemsPerRow(Number(e.target.value))}
@@ -151,13 +160,13 @@ export function POSMenuGrid({ onAddItem }: POSMenuGridProps) {
         {/* All Items Category */}
         <button
           onClick={() => setSelectedCategory("all")}
-          className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+          className={`flex flex-col items-center gap-1 px-3 sm:px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
             selectedCategory === "all"
               ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md"
               : "bg-gray-100 hover:bg-purple-50 text-gray-700"
           }`}
         >
-          <span className="text-xl">🍽️</span>
+          <span className="text-lg sm:text-xl">🍽️</span>
           <span className="text-xs font-medium">All Items</span>
         </button>
 
@@ -166,13 +175,13 @@ export function POSMenuGrid({ onAddItem }: POSMenuGridProps) {
           <button
             key={category.id}
             onClick={() => setSelectedCategory(category.name)}
-            className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+            className={`flex flex-col items-center gap-1 px-3 sm:px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
               selectedCategory === category.name
                 ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md"
                 : "bg-gray-100 hover:bg-purple-50 text-gray-700"
             }`}
           >
-            <span className="text-xl">{categoryIcons[category.name] || "🍴"}</span>
+            <span className="text-lg sm:text-xl">{categoryIcons[category.name] || "🍴"}</span>
             <span className="text-xs font-medium">{category.name}</span>
           </button>
         ))}
@@ -182,26 +191,55 @@ export function POSMenuGrid({ onAddItem }: POSMenuGridProps) {
         {filteredItems.map(item => (
           <div
             key={item.id}
-            className="relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:scale-[1.02]"
+            className="relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:scale-[1.02] active:scale-[0.98]"
             onClick={() => onAddItem(item)}
           >
-            <div className="aspect-square relative bg-gradient-to-br from-teal-700 to-teal-900">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-32 h-32 bg-gray-200 rounded-lg shadow-inner" />
-              </div>
+            <div className="aspect-square relative bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+              {item.image && item.image !== "/api/placeholder/120/120" ? (
+                <>
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                    loading="lazy"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const fallback = target.parentElement?.querySelector('.fallback-placeholder') as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                    onLoad={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.opacity = '1';
+                    }}
+                    style={{ opacity: 0 }}
+                  />
+                  <div className="fallback-placeholder absolute inset-0 flex items-center justify-center bg-gradient-to-br from-teal-700 to-teal-900" style={{ display: 'none' }}>
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white/20 rounded-lg flex items-center justify-center">
+                      <span className="text-white text-xs font-medium">No Image</span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-teal-700 to-teal-900">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white/20 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-xs font-medium">No Image</span>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="p-4">
+            <div className="p-3 sm:p-4">
               <h3
-                className="text-sm font-semibold text-gray-900 mb-3 overflow-hidden whitespace-nowrap text-ellipsis"
+                className="text-xs sm:text-sm font-semibold text-gray-900 mb-2 sm:mb-3 overflow-hidden whitespace-nowrap text-ellipsis"
                 title={item.name}
               >
                 {item.name}
               </h3>
               <div className="flex items-center justify-between">
-                <p className="text-sm font-bold text-gray-900">
+                <p className="text-xs sm:text-sm font-bold text-gray-900">
                   {item.price.toLocaleString()}₫
                 </p>
-                <button className="px-2 py-1.5 rounded-md bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 transition-colors duration-200 font-medium text-xs">
+                <button className="px-2 py-1.5 rounded-md bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 active:from-indigo-700 active:to-purple-800 transition-colors duration-200 font-medium text-xs touch-manipulation">
                   Add
                 </button>
               </div>

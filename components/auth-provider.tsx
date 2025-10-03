@@ -8,6 +8,10 @@ import {
   signInWithPopup,
   getRedirectResult,
   GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  updateProfile,
   signOut,
   User as FirebaseUser
 } from 'firebase/auth'
@@ -29,6 +33,9 @@ interface AuthContextType {
   userData: UserData | null
   loading: boolean
   signInWithGoogle: () => Promise<void>
+  signInWithEmail: (email: string, password: string) => Promise<void>
+  signUpWithEmail: (email: string, password: string, name: string) => Promise<void>
+  resetPassword: (email: string) => Promise<void>
   logout: () => Promise<void>
   hasRole: (role: string) => boolean
   hasPermission: (permission: string) => boolean
@@ -85,6 +92,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check for redirect result on page load
     const checkRedirectResult = async () => {
+      if (!auth) return
+
       try {
         console.log('Checking redirect result...')
         const result = await getRedirectResult(auth)
@@ -95,14 +104,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           console.log('No redirect result found')
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Redirect result error:', error)
         setLoading(false)
 
         // Handle specific redirect errors
-        if (error.code === 'auth/unauthorized-domain') {
+        if (error?.code === 'auth/unauthorized-domain') {
           console.error('Unauthorized domain - check Firebase console for authorized domains')
-        } else if (error.code === 'auth/operation-not-allowed') {
+        } else if (error?.code === 'auth/operation-not-allowed') {
           console.error('Google sign-in not enabled in Firebase console')
         }
       }
@@ -224,6 +233,108 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const signInWithEmail = async (email: string, password: string) => {
+    if (!auth) {
+      throw new Error('Authentication not available')
+    }
+
+    console.log('Starting email sign-in...')
+    setLoading(true)
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password)
+      console.log('Email sign-in successful:', result.user.email)
+
+      // Handle user data
+      await handleUserSignIn(result.user)
+
+      // Redirect to dashboard
+      router.push('/dashboard')
+
+    } catch (error: any) {
+      console.error('Email sign-in error:', error)
+      setLoading(false)
+
+      // Handle specific email auth errors
+      switch (error.code) {
+        case 'auth/user-not-found':
+          throw new Error('Không tìm thấy tài khoản với email này')
+        case 'auth/wrong-password':
+          throw new Error('Mật khẩu không chính xác')
+        case 'auth/invalid-email':
+          throw new Error('Email không hợp lệ')
+        case 'auth/user-disabled':
+          throw new Error('Tài khoản đã bị vô hiệu hóa')
+        case 'auth/too-many-requests':
+          throw new Error('Quá nhiều lần thử. Vui lòng thử lại sau')
+        default:
+          throw new Error(`Đăng nhập thất bại: ${error.message}`)
+      }
+    }
+  }
+
+  const signUpWithEmail = async (email: string, password: string, name: string) => {
+    if (!auth) {
+      throw new Error('Authentication not available')
+    }
+
+    console.log('Starting email signup...')
+    setLoading(true)
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password)
+      console.log('Email signup successful:', result.user.email)
+
+      // Update the user's display name
+      await updateProfile(result.user, { displayName: name })
+
+      // Handle user data creation
+      await handleUserSignIn(result.user)
+
+      // Redirect to dashboard
+      router.push('/dashboard')
+
+    } catch (error: any) {
+      console.error('Email signup error:', error)
+      setLoading(false)
+
+      // Handle specific signup errors
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          throw new Error('Email này đã được sử dụng')
+        case 'auth/invalid-email':
+          throw new Error('Email không hợp lệ')
+        case 'auth/weak-password':
+          throw new Error('Mật khẩu quá yếu. Vui lòng chọn mật khẩu mạnh hơn')
+        case 'auth/operation-not-allowed':
+          throw new Error('Đăng ký email/password chưa được bật')
+        default:
+          throw new Error(`Đăng ký thất bại: ${error.message}`)
+      }
+    }
+  }
+
+  const resetPassword = async (email: string) => {
+    if (!auth) {
+      throw new Error('Authentication not available')
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email)
+      console.log('Password reset email sent to:', email)
+    } catch (error: any) {
+      console.error('Password reset error:', error)
+
+      // Handle specific reset errors
+      switch (error.code) {
+        case 'auth/user-not-found':
+          throw new Error('Không tìm thấy tài khoản với email này')
+        case 'auth/invalid-email':
+          throw new Error('Email không hợp lệ')
+        default:
+          throw new Error(`Gửi email đặt lại mật khẩu thất bại: ${error.message}`)
+      }
+    }
+  }
+
   const logout = async () => {
     if (!auth) return
 
@@ -252,6 +363,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     userData,
     loading,
     signInWithGoogle,
+    signInWithEmail,
+    signUpWithEmail,
+    resetPassword,
     logout,
     hasRole,
     hasPermission

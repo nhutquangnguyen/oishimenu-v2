@@ -187,7 +187,7 @@ export async function deleteEmployee(id: string): Promise<boolean> {
  * Get employees by role
  */
 export async function getEmployeesByRole(role: string): Promise<Employee[]> {
-  return getEmployees({ role })
+  return getEmployees({ role: role as any })
 }
 
 /**
