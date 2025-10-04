@@ -1094,15 +1094,21 @@ const resources = {
   }
 }
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: 'en', // Default language (English)
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false
-    }
-  })
+if (!i18n.isInitialized) {
+  i18n
+    .use(initReactI18next)
+    .init({
+      resources,
+      lng: 'en', // Default language (English)
+      fallbackLng: 'en',
+      debug: false, // Set to false in production
+      interpolation: {
+        escapeValue: false
+      },
+      react: {
+        useSuspense: false // Disable suspense for SSR compatibility
+      }
+    })
+}
 
 export default i18n
