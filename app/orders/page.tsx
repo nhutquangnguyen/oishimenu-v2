@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { OrdersTable } from "@/components/orders-table"
 import { StoreStatusSelector } from "@/components/store-status-selector"
@@ -9,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Grid, List, ChevronDown } from "lucide-react"
 
 export default function OrdersPage() {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState("preparing")
   const [viewMode, setViewMode] = useState<"grid" | "list">("list")
   const [showReceiptFilter, setShowReceiptFilter] = useState(false)
@@ -19,14 +21,14 @@ export default function OrdersPage() {
       <div className="p-6">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">
-            Dinh Barista - Coffee & Tea - 305C Phạm Văn Đồng
+            {t('orders.storeName')}
           </h1>
           <div className="relative">
             <button
               onClick={() => setShowStatusSelector(true)}
               className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2 text-sm font-medium text-white hover:from-indigo-600 hover:to-purple-700 shadow-md"
             >
-              Normal
+              {t('orders.statusNormal')}
               <ChevronDown className="h-4 w-4" />
             </button>
           </div>
@@ -39,25 +41,25 @@ export default function OrdersPage() {
                 value="preparing"
                 className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
               >
-                Preparing
+                {t('orders.tabPreparing')}
               </TabsTrigger>
               <TabsTrigger
                 value="ready"
                 className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
               >
-                Ready
+                {t('orders.tabReady')}
               </TabsTrigger>
               <TabsTrigger
                 value="upcoming"
                 className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
               >
-                Upcoming
+                {t('orders.tabUpcoming')}
               </TabsTrigger>
               <TabsTrigger
                 value="history"
                 className="rounded-none border-b-2 border-transparent bg-transparent px-6 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
               >
-                History
+                {t('orders.tabHistory')}
               </TabsTrigger>
             </TabsList>
 

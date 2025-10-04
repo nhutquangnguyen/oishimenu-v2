@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import { Search, Plus, Loader2 } from "lucide-react"
 import { getMenuCategories, getMenuItems } from "@/lib/services/menu"
 import type { MenuItem as FirebaseMenuItem, MenuCategory } from "@/lib/types/menu"
@@ -29,6 +30,7 @@ const categoryIcons: { [key: string]: string } = {
 }
 
 export function POSMenuGrid({ onAddItem }: POSMenuGridProps) {
+  const { t } = useTranslation()
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
   const [categories, setCategories] = useState<MenuCategory[]>([])
@@ -105,7 +107,7 @@ export function POSMenuGrid({ onAddItem }: POSMenuGridProps) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
-        <span className="ml-2 text-gray-600">Loading menu...</span>
+        <span className="ml-2 text-gray-600">{t('pos.loading')}</span>
       </div>
     )
   }
@@ -114,13 +116,13 @@ export function POSMenuGrid({ onAddItem }: POSMenuGridProps) {
     return (
       <div className="rounded-lg bg-red-50 p-4">
         <div className="text-red-800">
-          <h3 className="font-medium">Error loading menu</h3>
+          <h3 className="font-medium">{t('pos.errorLoading')}</h3>
           <p className="text-sm mt-1">{error}</p>
           <button
             onClick={loadMenuData}
             className="mt-2 rounded bg-red-100 px-3 py-1 text-sm font-medium text-red-800 hover:bg-red-200"
           >
-            Try again
+            {t('pos.tryAgain')}
           </button>
         </div>
       </div>
@@ -134,14 +136,14 @@ export function POSMenuGrid({ onAddItem }: POSMenuGridProps) {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Search by Menu Item"
+            placeholder={t('pos.searchMenu')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full rounded-lg border border-gray-300 pl-10 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
           />
         </div>
         <div className="hidden sm:flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Items per row:</label>
+          <label className="text-sm font-medium text-gray-700 whitespace-nowrap">{t('pos.itemsPerRow')}:</label>
           <select
             value={itemsPerRow}
             onChange={(e) => setItemsPerRow(Number(e.target.value))}
@@ -167,7 +169,7 @@ export function POSMenuGrid({ onAddItem }: POSMenuGridProps) {
           }`}
         >
           <span className="text-lg sm:text-xl">🍽️</span>
-          <span className="text-xs font-medium">All Items</span>
+          <span className="text-xs font-medium">{t('pos.allCategories')}</span>
         </button>
 
         {/* Dynamic Categories from Firebase */}

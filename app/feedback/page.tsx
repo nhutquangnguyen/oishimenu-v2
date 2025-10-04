@@ -2,14 +2,17 @@
 
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { FeedbackManagement } from "@/components/feedback-management"
+import { useTranslation } from "react-i18next"
 
 export default function FeedbackPage() {
+  const { t } = useTranslation()
+
   return (
     <DashboardLayout>
       <div className="p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Customer Feedback</h1>
-          <p className="text-gray-600 mt-1">Manage customer reviews and ratings</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('feedback.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('feedback.subtitle')}</p>
         </div>
 
         <FeedbackManagement />

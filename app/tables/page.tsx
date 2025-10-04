@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Plus, Search, Edit, Trash2, Users, MapPin, MoreVertical, AlertCircle, CheckCircle, Clock, AlertTriangle, X } from "lucide-react"
 import { getTables, createTable, updateTable, deleteTable, updateTableStatus, getTableStats } from "@/lib/services/table"
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/select"
 
 export default function TablesPage() {
+  const { t } = useTranslation()
   const [tables, setTables] = useState<Table[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -122,15 +124,15 @@ export default function TablesPage() {
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Table Management</h1>
-            <p className="text-gray-600">Manage restaurant tables and seating</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('tables.title')}</h1>
+            <p className="text-gray-600">{t('tables.subtitle')}</p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
             className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2 text-sm font-medium text-white hover:from-indigo-600 hover:to-purple-700 shadow-md"
           >
             <Plus className="h-4 w-4" />
-            Add Table
+            {t('tables.addTable')}
           </button>
         </div>
 
@@ -144,7 +146,7 @@ export default function TablesPage() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Tables</dt>
+                    <dt className="text-sm font-medium text-gray-500 truncate">{t('tables.totalTables')}</dt>
                     <dd className="text-lg font-medium text-gray-900">{stats.total}</dd>
                   </dl>
                 </div>
@@ -158,7 +160,7 @@ export default function TablesPage() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Available</dt>
+                    <dt className="text-sm font-medium text-gray-500 truncate">{t('tables.available')}</dt>
                     <dd className="text-lg font-medium text-gray-900">{stats.available}</dd>
                   </dl>
                 </div>
@@ -172,7 +174,7 @@ export default function TablesPage() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Occupied</dt>
+                    <dt className="text-sm font-medium text-gray-500 truncate">{t('tables.occupied')}</dt>
                     <dd className="text-lg font-medium text-gray-900">{stats.occupied}</dd>
                   </dl>
                 </div>
@@ -188,7 +190,7 @@ export default function TablesPage() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Occupancy Rate</dt>
+                    <dt className="text-sm font-medium text-gray-500 truncate">{t('tables.occupancyRate')}</dt>
                     <dd className="text-lg font-medium text-gray-900">{stats.occupancyRate.toFixed(1)}%</dd>
                   </dl>
                 </div>
@@ -203,7 +205,7 @@ export default function TablesPage() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search tables..."
+              placeholder={t('tables.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-lg border border-gray-300 pl-10 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
@@ -214,12 +216,12 @@ export default function TablesPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="AVAILABLE">Available</SelectItem>
-              <SelectItem value="OCCUPIED">Occupied</SelectItem>
-              <SelectItem value="RESERVED">Reserved</SelectItem>
-              <SelectItem value="CLEANING">Cleaning</SelectItem>
-              <SelectItem value="OUT_OF_ORDER">Out of Order</SelectItem>
+              <SelectItem value="all">{t('tables.allStatus')}</SelectItem>
+              <SelectItem value="AVAILABLE">{t('tables.available')}</SelectItem>
+              <SelectItem value="OCCUPIED">{t('tables.occupied')}</SelectItem>
+              <SelectItem value="RESERVED">{t('tables.reserved')}</SelectItem>
+              <SelectItem value="CLEANING">{t('tables.cleaning')}</SelectItem>
+              <SelectItem value="OUT_OF_ORDER">{t('tables.outOfOrder')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -314,7 +316,7 @@ function TableCard({ table, onStatusChange, onEdit, onDelete, getStatusColor, ge
                 className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 <Edit className="mr-3 h-4 w-4" />
-                Edit Table
+{t('tables.editTable')}
               </button>
               <button
                 onClick={() => {
@@ -324,7 +326,7 @@ function TableCard({ table, onStatusChange, onEdit, onDelete, getStatusColor, ge
                 className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
               >
                 <Trash2 className="mr-3 h-4 w-4" />
-                Delete Table
+{t('tables.deleteTable')}
               </button>
             </div>
           )}
@@ -361,11 +363,11 @@ function TableCard({ table, onStatusChange, onEdit, onDelete, getStatusColor, ge
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="AVAILABLE">Available</SelectItem>
-            <SelectItem value="OCCUPIED">Occupied</SelectItem>
-            <SelectItem value="RESERVED">Reserved</SelectItem>
-            <SelectItem value="CLEANING">Cleaning</SelectItem>
-            <SelectItem value="OUT_OF_ORDER">Out of Order</SelectItem>
+            <SelectItem value="AVAILABLE">{t('tables.available')}</SelectItem>
+            <SelectItem value="OCCUPIED">{t('tables.occupied')}</SelectItem>
+            <SelectItem value="RESERVED">{t('tables.reserved')}</SelectItem>
+            <SelectItem value="CLEANING">{t('tables.cleaning')}</SelectItem>
+            <SelectItem value="OUT_OF_ORDER">{t('tables.outOfOrder')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -410,26 +412,26 @@ function CreateTableModal({ onClose, onSuccess }: {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="w-full max-w-md rounded-lg bg-white p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Add New Table</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('tables.addNewTable')}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Table Name *
+              {t('tables.tableName')} *
             </label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-              placeholder="e.g., Table 1, VIP A"
+              placeholder={t('tables.tableNamePlaceholder')}
               required
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Number of Seats *
+              {t('tables.numberOfSeats')} *
             </label>
             <input
               type="number"
@@ -443,27 +445,27 @@ function CreateTableModal({ onClose, onSuccess }: {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Location
+              {t('tables.location')}
             </label>
             <input
               type="text"
               value={formData.location}
               onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-              placeholder="e.g., Main Floor, Terrace, VIP Room"
+              placeholder={t('tables.locationPlaceholder')}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
+              {t('tables.description')}
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
               rows={2}
-              placeholder="Additional notes about this table"
+              placeholder={t('tables.descriptionPlaceholder')}
             />
           </div>
 
@@ -473,14 +475,14 @@ function CreateTableModal({ onClose, onSuccess }: {
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
             >
-              Cancel
+{t('common.cancel')}
             </button>
             <button
               type="submit"
               disabled={loading || !formData.name.trim()}
               className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50"
             >
-              {loading ? 'Creating...' : 'Create Table'}
+{loading ? t('common.creating') : t('common.createTable')}
             </button>
           </div>
         </form>
@@ -527,26 +529,26 @@ function EditTableModal({ table, onClose, onSuccess }: {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="w-full max-w-md rounded-lg bg-white p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Edit Table</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('tables.editTable')}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Table Name *
+              {t('tables.tableName')} *
             </label>
             <input
               type="text"
               value={formData.name || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-              placeholder="e.g., Table 1, VIP A"
+              placeholder={t('tables.tableNamePlaceholder')}
               required
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Number of Seats *
+              {t('tables.numberOfSeats')} *
             </label>
             <input
               type="number"
@@ -560,27 +562,27 @@ function EditTableModal({ table, onClose, onSuccess }: {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Location
+              {t('tables.location')}
             </label>
             <input
               type="text"
               value={formData.location || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-              placeholder="e.g., Main Floor, Terrace, VIP Room"
+              placeholder={t('tables.locationPlaceholder')}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
+              {t('tables.description')}
             </label>
             <textarea
               value={formData.description || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
               rows={2}
-              placeholder="Additional notes about this table"
+              placeholder={t('tables.descriptionPlaceholder')}
             />
           </div>
 
@@ -590,14 +592,14 @@ function EditTableModal({ table, onClose, onSuccess }: {
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
             >
-              Cancel
+{t('common.cancel')}
             </button>
             <button
               type="submit"
               disabled={loading || !formData.name?.trim()}
               className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50"
             >
-              {loading ? 'Updating...' : 'Update Table'}
+{loading ? t('common.updating') : t('common.updateTable')}
             </button>
           </div>
         </form>

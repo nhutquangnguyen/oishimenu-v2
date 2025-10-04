@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
 import {
   Home,
@@ -22,18 +23,18 @@ import {
 import { UserProfile } from "./user-profile"
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: Home },
-  { name: "Insights", href: "/insights", icon: TrendingUp },
-  { name: "Orders", href: "/orders", icon: ShoppingBag },
-  { name: "POS", href: "/pos", icon: ShoppingCart },
-  { name: "Tables", href: "/tables", icon: Grid3X3 },
-  { name: "Feedback", href: "/feedback", icon: MessageSquare },
-  { name: "Finance", href: "/finance", icon: DollarSign },
-  { name: "Marketing", href: "/marketing", icon: Target },
-  { name: "Menu", href: "/menu", icon: Menu },
-  { name: "Inventory", href: "/inventory", icon: Package },
-  { name: "Employees", href: "/employees", icon: Users },
-  { name: "Help Centre", href: "/help", icon: HelpCircle },
+  { name: "nav.dashboard", href: "/dashboard", icon: Home },
+  { name: "nav.insights", href: "/insights", icon: TrendingUp },
+  { name: "nav.orders", href: "/orders", icon: ShoppingBag },
+  { name: "nav.pos", href: "/pos", icon: ShoppingCart },
+  { name: "nav.tables", href: "/tables", icon: Grid3X3 },
+  { name: "nav.feedback", href: "/feedback", icon: MessageSquare },
+  { name: "nav.finance", href: "/finance", icon: DollarSign },
+  { name: "nav.marketing", href: "/marketing", icon: Target },
+  { name: "nav.menu", href: "/menu", icon: Menu },
+  { name: "nav.inventory", href: "/inventory", icon: Package },
+  { name: "nav.employees", href: "/employees", icon: Users },
+  { name: "nav.help", href: "/help", icon: HelpCircle },
 ]
 
 interface SidebarProps {
@@ -42,6 +43,7 @@ interface SidebarProps {
 
 export function Sidebar({ onClose }: SidebarProps = {}) {
   const pathname = usePathname()
+  const { t } = useTranslation()
 
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-white">
@@ -81,7 +83,7 @@ export function Sidebar({ onClose }: SidebarProps = {}) {
               )}
             >
               <item.icon className="h-5 w-5" />
-              {item.name}
+              {t(item.name)}
             </Link>
           )
         })}
@@ -89,7 +91,7 @@ export function Sidebar({ onClose }: SidebarProps = {}) {
 
       <div className="border-t p-4">
         <button className="flex w-full items-center justify-center gap-2 rounded-lg border border-purple-300 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-50">
-          Get the App
+          {t("common.getApp")}
         </button>
       </div>
 

@@ -6,6 +6,13 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
 
+  // Internationalization configuration - temporarily disabled
+  // i18n: {
+  //   locales: ['en', 'vi'],
+  //   defaultLocale: 'vi', // Vietnam market first, then global
+  //   localeDetection: false, // Disable auto-detection for now
+  // },
+
   // Custom domains configuration
   async rewrites() {
     return [

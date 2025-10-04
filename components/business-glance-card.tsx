@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import { TrendingUp, Clock, Loader2 } from "lucide-react"
 import { getTodayOrders, getOrderStats } from "@/lib/services/order"
 
@@ -11,6 +12,7 @@ interface BusinessStats {
 }
 
 export function BusinessGlanceCard() {
+  const { t } = useTranslation()
   const [stats, setStats] = useState<BusinessStats | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -75,17 +77,17 @@ export function BusinessGlanceCard() {
   function formatTimeAgo(date: Date): string {
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
 
-    if (seconds < 60) return 'A few seconds ago'
-    if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`
-    return 'More than a day ago'
+    if (seconds < 60) return t('business.timeAgo.seconds')
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} ${t('business.timeAgo.minutes')}`
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} ${t('business.timeAgo.hours')}`
+    return t('business.timeAgo.moreThanDay')
   }
 
   return (
     <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6 text-white">
       <div className="relative z-10">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Your business at a glance</h2>
+          <h2 className="text-lg font-semibold">{t('business.glanceTitle')}</h2>
           <div className="flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs backdrop-blur-sm">
             {loading ? (
               <Loader2 className="h-3 w-3 animate-spin" />
@@ -93,19 +95,19 @@ export function BusinessGlanceCard() {
               <Clock className="h-3 w-3" />
             )}
             <span>
-              {stats ? `Last updated: ${formatTimeAgo(stats.lastUpdated)}` : 'Loading...'}
+              {stats ? `${t('business.lastUpdated')}: ${formatTimeAgo(stats.lastUpdated)}` : t('business.loading')}
             </span>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-8">
           <div>
-            <p className="mb-1 text-sm opacity-90">Net sales today</p>
+            <p className="mb-1 text-sm opacity-90">{t('business.netSalesToday')}</p>
             <p className="text-3xl font-bold">
               {loading ? (
                 <span className="inline-flex items-center gap-2">
                   <Loader2 className="h-6 w-6 animate-spin" />
-                  Loading...
+                  {t('business.loading')}
                 </span>
               ) : (
                 formatCurrency(stats?.todaySales || 0)
@@ -113,12 +115,12 @@ export function BusinessGlanceCard() {
             </p>
           </div>
           <div>
-            <p className="mb-1 text-sm opacity-90">Number of transactions today</p>
+            <p className="mb-1 text-sm opacity-90">{t('business.transactionsToday')}</p>
             <p className="text-3xl font-bold">
               {loading ? (
                 <span className="inline-flex items-center gap-2">
                   <Loader2 className="h-6 w-6 animate-spin" />
-                  Loading...
+                  {t('business.loading')}
                 </span>
               ) : (
                 stats?.todayTransactions || 0

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Plus, Minus, Trash2, ShoppingCart, Phone, MapPin, CreditCard, User, Check, Edit } from "lucide-react"
 import { OrderItem } from "@/app/pos/page"
 import { TableSelector } from "./table-selector"
@@ -28,6 +29,7 @@ export function POSOrderSummaryV3({
   onClearOrder,
   onPlaceOrder
 }: POSOrderSummaryV3Props) {
+  const { t } = useTranslation()
   const [itemsLocked, setItemsLocked] = useState(false)
   const [customerPhone, setCustomerPhone] = useState("")
   const [customer, setCustomer] = useState<Customer | null>(null)
@@ -134,14 +136,14 @@ export function POSOrderSummaryV3({
     <div className={`border-b ${itemsLocked ? 'bg-gray-50' : ''}`}>
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-gray-900">Order Items</h3>
+          <h3 className="text-sm font-semibold text-gray-900">{t('pos.orderItems')}</h3>
           {itemsLocked && (
             <button
               onClick={handleEditItems}
               className="text-xs text-purple-600 hover:text-purple-700 flex items-center gap-1"
             >
               <Edit className="h-3 w-3" />
-              Edit
+              {t('pos.editItems')}
             </button>
           )}
         </div>
@@ -156,7 +158,7 @@ export function POSOrderSummaryV3({
               </div>
             ))}
             <div className="pt-2 border-t flex justify-between items-center">
-              <span className="text-sm font-semibold">Subtotal</span>
+              <span className="text-sm font-semibold">{t('pos.subtotal')}</span>
               <span className="text-sm font-semibold">{subtotal.toLocaleString()}₫</span>
             </div>
           </div>
@@ -166,7 +168,7 @@ export function POSOrderSummaryV3({
             {items.length === 0 ? (
               <div className="text-center py-4 text-gray-400">
                 <ShoppingCart className="h-8 w-8 mx-auto mb-2" />
-                <p className="text-sm">No items in cart</p>
+                <p className="text-sm">{t('pos.noItemsInCart')}</p>
               </div>
             ) : (
               <>
@@ -204,7 +206,7 @@ export function POSOrderSummaryV3({
                 ))}
                 <div className="pt-2 border-t">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm">Subtotal</span>
+                    <span className="text-sm">{t('pos.subtotal')}</span>
                     <span className="text-sm font-medium">{subtotal.toLocaleString()}₫</span>
                   </div>
                 </div>
@@ -212,7 +214,7 @@ export function POSOrderSummaryV3({
                   onClick={handleContinueFromItems}
                   className="w-full px-3 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-indigo-600 hover:to-purple-700"
                 >
-                  Continue to Customer
+                  {t('pos.continueToCustomer')}
                 </button>
               </>
             )}
@@ -229,14 +231,14 @@ export function POSOrderSummaryV3({
       <div className={`border-b ${customerLocked ? 'bg-gray-50' : ''}`}>
         <div className="p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-900">Customer Information</h3>
+            <h3 className="text-sm font-semibold text-gray-900">{t('pos.customerInfo')}</h3>
             {customerLocked && (
               <button
                 onClick={handleEditCustomer}
                 className="text-xs text-purple-600 hover:text-purple-700 flex items-center gap-1"
               >
                 <Edit className="h-3 w-3" />
-                Edit
+                {t('pos.edit')}
               </button>
             )}
           </div>
@@ -266,7 +268,7 @@ export function POSOrderSummaryV3({
                     type="tel"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
-                    placeholder="Phone number"
+                    placeholder={t('pos.phoneNumber')}
                     className="w-full pl-8 pr-2 py-2 border rounded-lg text-sm focus:border-purple-500 focus:outline-none"
                   />
                 </div>
@@ -275,7 +277,7 @@ export function POSOrderSummaryV3({
                   disabled={!customerPhone}
                   className="px-3 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50"
                 >
-                  Lookup
+{t('pos.lookup')}
                 </button>
               </div>
 
@@ -286,13 +288,13 @@ export function POSOrderSummaryV3({
                       <User className="h-4 w-4 text-purple-600" />
                       {customer.isNew ? (
                         <div>
-                          <p className="text-sm font-medium text-green-600">New Customer</p>
-                          <p className="text-xs text-gray-600">Will be created automatically</p>
+                          <p className="text-sm font-medium text-green-600">{t('pos.newCustomer')}</p>
+                          <p className="text-xs text-gray-600">{t('pos.willBeCreatedAutomatically')}</p>
                         </div>
                       ) : (
                         <div>
                           <p className="text-sm font-medium text-gray-900">{customer.name}</p>
-                          <p className="text-xs text-gray-600">Existing customer</p>
+                          <p className="text-xs text-gray-600">{t('pos.existingCustomer')}</p>
                         </div>
                       )}
                     </div>
@@ -301,7 +303,7 @@ export function POSOrderSummaryV3({
                     onClick={handleContinueFromCustomer}
                     className="w-full px-3 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-indigo-600 hover:to-purple-700"
                   >
-                    Continue to Source
+{t('pos.continueToSource')}
                   </button>
                 </>
               )}
@@ -319,14 +321,14 @@ export function POSOrderSummaryV3({
       <div className={`border-b ${sourceLocked ? 'bg-gray-50' : ''}`}>
         <div className="p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-900">Order Source</h3>
+            <h3 className="text-sm font-semibold text-gray-900">{t('pos.orderSource')}</h3>
             {sourceLocked && (
               <button
                 onClick={handleEditSource}
                 className="text-xs text-purple-600 hover:text-purple-700 flex items-center gap-1"
               >
                 <Edit className="h-3 w-3" />
-                Edit
+                {t('pos.edit')}
               </button>
             )}
           </div>
@@ -336,8 +338,8 @@ export function POSOrderSummaryV3({
             <div className="flex items-center gap-2">
               <div className="px-3 py-1 bg-purple-100 rounded-full">
                 <span className="text-sm font-medium text-purple-700 capitalize">
-                  {orderSource === "dine-in" ? "Dine In" :
-                   orderSource === "takeaway" ? "Takeaway" :
+                  {orderSource === "dine-in" ? t('pos.dineIn') :
+                   orderSource === "takeaway" ? t('pos.takeaway') :
                    orderSource === "grab" ? "OishiDelivery" : "ShopeeFood"}
                 </span>
               </div>
@@ -350,7 +352,7 @@ export function POSOrderSummaryV3({
                 className="p-3 border-2 rounded-lg hover:border-purple-600 hover:bg-purple-50 transition-colors"
               >
                 <MapPin className="h-5 w-5 mx-auto mb-1 text-purple-600" />
-                <p className="text-xs font-medium">Dine In</p>
+                <p className="text-xs font-medium">{t('pos.dineIn')}</p>
               </button>
 
               <button
@@ -358,7 +360,7 @@ export function POSOrderSummaryV3({
                 className="p-3 border-2 rounded-lg hover:border-purple-600 hover:bg-purple-50 transition-colors"
               >
                 <ShoppingCart className="h-5 w-5 mx-auto mb-1 text-purple-600" />
-                <p className="text-xs font-medium">Takeaway</p>
+                <p className="text-xs font-medium">{t('pos.takeaway')}</p>
               </button>
 
               <button
@@ -393,14 +395,14 @@ export function POSOrderSummaryV3({
     return (
       <div className="flex-1 overflow-auto">
         <div className="p-4">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Order Details</h3>
+          <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('pos.orderDetails')}</h3>
 
           <div className="space-y-3">
             {(orderSource === "dine-in" || orderSource === "takeaway") ? (
               <>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Discount (₫)
+{t('pos.discountVnd')}
                   </label>
                   <input
                     type="number"
@@ -413,33 +415,33 @@ export function POSOrderSummaryV3({
 
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Payment Method
+{t('pos.paymentMethod')}
                   </label>
                   <select
                     value={orderDetails.paymentMethod}
                     onChange={(e) => setOrderDetails({...orderDetails, paymentMethod: e.target.value})}
                     className="w-full px-2 py-1.5 border rounded text-sm focus:border-purple-500 focus:outline-none"
                   >
-                    <option value="cash">Cash</option>
-                    <option value="card">Card</option>
-                    <option value="transfer">Bank Transfer</option>
-                    <option value="momo">MoMo</option>
-                    <option value="zalopay">ZaloPay</option>
+                    <option value="cash">{t('pos.cash')}</option>
+                    <option value="card">{t('pos.card')}</option>
+                    <option value="transfer">{t('pos.bankTransfer')}</option>
+                    <option value="momo">{t('pos.momo')}</option>
+                    <option value="zalopay">{t('pos.zalopay')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Payment Status
+{t('pos.paymentStatus')}
                   </label>
                   <select
                     value={orderDetails.paymentStatus}
                     onChange={(e) => setOrderDetails({...orderDetails, paymentStatus: e.target.value})}
                     className="w-full px-2 py-1.5 border rounded text-sm focus:border-purple-500 focus:outline-none"
                   >
-                    <option value="unpaid">Unpaid</option>
-                    <option value="paid">Paid</option>
-                    <option value="partial">Partial</option>
+                    <option value="unpaid">{t('pos.unpaid')}</option>
+                    <option value="paid">{t('pos.paid')}</option>
+                    <option value="partial">{t('pos.partial')}</option>
                   </select>
                 </div>
 
@@ -458,29 +460,29 @@ export function POSOrderSummaryV3({
             ) : (
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Amount After Fee (₫)
+{t('pos.amountAfterFee')}
                 </label>
                 <input
                   type="number"
                   value={orderDetails.amountAfterFee}
                   onChange={(e) => setOrderDetails({...orderDetails, amountAfterFee: e.target.value})}
-                  placeholder="Enter amount"
+                  placeholder={t('pos.enterAmount')}
                   className="w-full px-2 py-1.5 border rounded text-sm focus:border-purple-500 focus:outline-none"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Original: {total.toLocaleString()}₫
+                  {t('pos.original')}: {total.toLocaleString()}₫
                 </p>
               </div>
             )}
 
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
-                Order Notes
+{t('pos.orderNotes')}
               </label>
               <textarea
                 value={orderDetails.note}
                 onChange={(e) => setOrderDetails({...orderDetails, note: e.target.value})}
-                placeholder="Special instructions..."
+                placeholder={t('pos.specialInstructions')}
                 className="w-full px-2 py-1.5 border rounded text-sm focus:border-purple-500 focus:outline-none resize-none"
                 rows={2}
               />
@@ -498,17 +500,17 @@ export function POSOrderSummaryV3({
       <div className="border-t p-4 bg-white">
         <div className="space-y-2 mb-3">
           <div className="flex justify-between items-center">
-            <span className="text-sm">Subtotal</span>
+            <span className="text-sm">{t('pos.subtotal')}</span>
             <span className="text-sm font-medium">{subtotal.toLocaleString()}₫</span>
           </div>
           {discount > 0 && (
             <div className="flex justify-between items-center">
-              <span className="text-sm">Discount</span>
+              <span className="text-sm">{t('pos.discount')}</span>
               <span className="text-sm text-red-600">-{discount.toLocaleString()}₫</span>
             </div>
           )}
           <div className="flex justify-between items-center pt-2 border-t">
-            <span className="font-semibold">Total</span>
+            <span className="font-semibold">{t('pos.total')}</span>
             <span className="font-semibold text-lg">{total.toLocaleString()}₫</span>
           </div>
         </div>
@@ -518,13 +520,13 @@ export function POSOrderSummaryV3({
             onClick={onClearOrder}
             className="flex-1 px-3 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600"
           >
-            Cancel
+{t('pos.cancel')}
           </button>
           <button
             onClick={handleFinalizeOrder}
             className="flex-1 px-3 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-indigo-600 hover:to-purple-700"
           >
-            Place Order
+{t('pos.placeOrder')}
           </button>
         </div>
       </div>
@@ -536,11 +538,11 @@ export function POSOrderSummaryV3({
       {/* Mobile header */}
       <div className="lg:hidden border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Order Summary</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('pos.orderSummary')}</h2>
           <div className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5 text-purple-600" />
             <span className="text-sm font-medium text-purple-600">
-              {items.length} {items.length === 1 ? 'item' : 'items'}
+              {items.length} {items.length === 1 ? t('pos.item') : t('pos.items')}
             </span>
           </div>
         </div>

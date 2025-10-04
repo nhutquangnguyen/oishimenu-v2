@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import { AlertTriangle, CheckCircle, XCircle, Bell, BellOff } from "lucide-react"
 import { getStockAlerts, acknowledgeStockAlert } from "@/lib/services/inventory"
 import type { StockAlert } from "@/lib/types/inventory"
@@ -19,6 +20,7 @@ function formatPrice(price: number): string {
 }
 
 export function StockAlerts({ showAll = false, onAlertCountChange }: StockAlertsProps) {
+  const { t } = useTranslation()
   const [alerts, setAlerts] = useState<StockAlert[]>([])
   const [loading, setLoading] = useState(true)
   const [acknowledging, setAcknowledging] = useState<Set<string>>(new Set())
@@ -101,12 +103,12 @@ export function StockAlerts({ showAll = false, onAlertCountChange }: StockAlerts
   const getAlertTitle = (level: StockAlert['alertLevel']) => {
     switch (level) {
       case 'critical':
-        return 'Critical Stock Level'
+        return t('stock.criticalLevel')
       case 'out_of_stock':
-        return 'Out of Stock'
+        return t('stock.outOfStock')
       case 'low':
       default:
-        return 'Low Stock Alert'
+        return t('stock.lowStockAlert')
     }
   }
 
@@ -129,11 +131,11 @@ export function StockAlerts({ showAll = false, onAlertCountChange }: StockAlerts
       <div className="text-center py-8 text-gray-500">
         <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300" />
         <p className="text-sm">
-          {showAll ? 'No stock alerts found' : 'No pending stock alerts'}
+          {showAll ? t('stock.noAlertsFound') : t('stock.noPendingAlerts')}
         </p>
         {!showAll && (
           <p className="text-xs text-gray-400 mt-1">
-            All ingredients are above minimum thresholds
+            {t('stock.allIngredientsOk')}
           </p>
         )}
       </div>
@@ -163,31 +165,31 @@ export function StockAlerts({ showAll = false, onAlertCountChange }: StockAlerts
                 </div>
 
                 <p className="text-sm text-gray-700 mb-2">
-                  <span className="font-medium">{alert.ingredientName}</span> is running low
+                  <span className="font-medium">{alert.ingredientName}</span> {t('stock.isRunningLow')}
                 </p>
 
                 <div className="text-xs text-gray-600 space-y-1">
                   <div className="flex justify-between items-center">
-                    <span>Current Stock:</span>
+                    <span>{t('stock.currentStock')}:</span>
                     <span className={`font-medium ${
                       alert.currentQuantity <= 0 ? 'text-red-600' :
                       alert.currentQuantity <= alert.minimumThreshold * 0.5 ? 'text-red-500' :
                       'text-yellow-600'
                     }`}>
-                      {alert.currentQuantity} units
+                      {alert.currentQuantity} {t('stock.units')}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>Minimum Threshold:</span>
-                    <span className="font-medium">{alert.minimumThreshold} units</span>
+                    <span>{t('stock.minimumThreshold')}:</span>
+                    <span className="font-medium">{alert.minimumThreshold} {t('stock.units')}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>Alert Created:</span>
+                    <span>{t('stock.alertCreated')}:</span>
                     <span>{alert.createdAt.toLocaleDateString()} {alert.createdAt.toLocaleTimeString()}</span>
                   </div>
                   {alert.acknowledgedAt && (
                     <div className="flex justify-between items-center">
-                      <span>Acknowledged:</span>
+                      <span>{t('stock.acknowledged')}:</span>
                       <span>{alert.acknowledgedAt.toLocaleDateString()} {alert.acknowledgedAt.toLocaleTimeString()}</span>
                     </div>
                   )}
@@ -201,7 +203,7 @@ export function StockAlerts({ showAll = false, onAlertCountChange }: StockAlerts
                 disabled={acknowledging.has(alert.id)}
                 className="ml-4 px-3 py-1 text-xs font-medium text-green-700 bg-green-100 hover:bg-green-200 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {acknowledging.has(alert.id) ? 'Acknowledging...' : 'Acknowledge'}
+                {acknowledging.has(alert.id) ? t('stock.acknowledging') : t('stock.acknowledge')}
               </button>
             )}
           </div>
@@ -224,6 +226,7 @@ export function StockAlertBadge({ count }: { count: number }) {
 
 // Quick alerts summary for dashboard
 export function StockAlertsSummary() {
+  const { t } = useTranslation()
   const [alertCount, setAlertCount] = useState(0)
   const [criticalCount, setCriticalCount] = useState(0)
 
@@ -257,7 +260,7 @@ export function StockAlertsSummary() {
         <div className="flex items-center gap-2">
           <CheckCircle className="h-5 w-5 text-green-500" />
           <span className="text-sm font-medium text-green-800">
-            All ingredients are well stocked
+            {t('stock.allIngredientsWellStocked')}
           </span>
         </div>
       </div>
@@ -278,11 +281,11 @@ export function StockAlertsSummary() {
           <p className={`text-sm font-medium ${
             criticalCount > 0 ? 'text-red-800' : 'text-yellow-800'
           }`}>
-            {alertCount} Stock Alert{alertCount !== 1 ? 's' : ''}
+            {alertCount} {t('stock.stockAlert')}{alertCount !== 1 ? 's' : ''}
           </p>
           {criticalCount > 0 && (
             <p className="text-xs text-red-600">
-              {criticalCount} critical or out of stock
+              {criticalCount} {t('stock.criticalOrOutOfStock')}
             </p>
           )}
         </div>

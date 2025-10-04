@@ -3,14 +3,17 @@
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { HelpCircle, MessageCircle, Book, Phone, Mail, ExternalLink } from "lucide-react"
+import { useTranslation } from 'react-i18next'
 
 export default function HelpPage() {
+  const { t } = useTranslation()
+
   return (
     <DashboardLayout>
       <div className="p-6 space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Help Centre</h1>
-          <p className="text-gray-600">Get support and find answers to common questions</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('help.title')}</h1>
+          <p className="text-gray-600">{t('help.subtitle')}</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -18,18 +21,18 @@ export default function HelpPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Book className="h-5 w-5 text-blue-600" />
-                Documentation
+{t('help.documentation')}
               </CardTitle>
               <CardDescription>
-                Comprehensive guides and tutorials
+{t('help.documentationDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 mb-4">
-                Learn how to use all features of OishiMenu with step-by-step guides.
+                {t('help.learnFeatures')}
               </p>
               <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
-                View Documentation
+                {t('help.viewDocumentation')}
                 <ExternalLink className="h-4 w-4" />
               </button>
             </CardContent>
@@ -39,18 +42,18 @@ export default function HelpPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <MessageCircle className="h-5 w-5 text-green-600" />
-                Live Chat
+{t('help.liveChat')}
               </CardTitle>
               <CardDescription>
-                Chat with our support team
+{t('help.liveChatDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 mb-4">
-                Get instant help from our customer support representatives.
+                {t('help.instantHelp')}
               </p>
               <button className="flex items-center gap-2 text-green-600 hover:text-green-700">
-                Start Chat
+                {t('help.startChat')}
                 <MessageCircle className="h-4 w-4" />
               </button>
             </CardContent>
@@ -60,18 +63,18 @@ export default function HelpPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <HelpCircle className="h-5 w-5 text-purple-600" />
-                FAQ
+{t('help.faq')}
               </CardTitle>
               <CardDescription>
-                Frequently asked questions
+                {t('help.faqDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 mb-4">
-                Find quick answers to the most common questions.
+                {t('help.quickAnswers')}
               </p>
               <button className="flex items-center gap-2 text-purple-600 hover:text-purple-700">
-                Browse FAQ
+                {t('help.browseFAQ')}
                 <ExternalLink className="h-4 w-4" />
               </button>
             </CardContent>
@@ -81,63 +84,63 @@ export default function HelpPage() {
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Contact Support</CardTitle>
-              <CardDescription>Reach out to our support team</CardDescription>
+              <CardTitle>{t('help.contactSupport')}</CardTitle>
+              <CardDescription>{t('help.contactSupportDesc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-3 p-3 border rounded-lg">
                 <Phone className="h-5 w-5 text-blue-600" />
                 <div>
-                  <p className="font-medium">Phone Support</p>
-                  <p className="text-sm text-gray-600">+84 (0) 123 456 789</p>
-                  <p className="text-xs text-gray-500">Mon-Fri: 8AM - 6PM</p>
+                  <p className="font-medium">{t('help.phoneSupport')}</p>
+                  <p className="text-sm text-gray-600">{t('help.phoneNumber')}</p>
+                  <p className="text-xs text-gray-500">{t('help.phoneHours')}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 p-3 border rounded-lg">
                 <Mail className="h-5 w-5 text-green-600" />
                 <div>
-                  <p className="font-medium">Email Support</p>
-                  <p className="text-sm text-gray-600">support@oishimenu.com</p>
-                  <p className="text-xs text-gray-500">Response within 24 hours</p>
+                  <p className="font-medium">{t('help.emailSupport')}</p>
+                  <p className="text-sm text-gray-600">{t('help.emailAddress')}</p>
+                  <p className="text-xs text-gray-500">{t('help.responseTime')}</p>
                 </div>
               </div>
 
               <button className="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
-                Submit Support Ticket
+{t('help.submitTicket')}
               </button>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Quick Help</CardTitle>
-              <CardDescription>Common topics and solutions</CardDescription>
+              <CardTitle>{t('help.quickHelp')}</CardTitle>
+              <CardDescription>{t('help.quickHelpDesc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                <h3 className="font-medium mb-1">How to add new menu items?</h3>
-                <p className="text-sm text-gray-600">Learn how to create and manage your menu items</p>
+                <h3 className="font-medium mb-1">{t('help.topic1')}</h3>
+                <p className="text-sm text-gray-600">{t('help.topic1Desc')}</p>
               </div>
 
               <div className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                <h3 className="font-medium mb-1">Setting up Google authentication</h3>
-                <p className="text-sm text-gray-600">Configure Google OAuth for secure login</p>
+                <h3 className="font-medium mb-1">{t('help.googleAuth')}</h3>
+                <p className="text-sm text-gray-600">{t('help.googleAuthDesc')}</p>
               </div>
 
               <div className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                <h3 className="font-medium mb-1">Managing inventory and stock alerts</h3>
-                <p className="text-sm text-gray-600">Track ingredients and set up low stock notifications</p>
+                <h3 className="font-medium mb-1">{t('help.inventoryManagement')}</h3>
+                <p className="text-sm text-gray-600">{t('help.inventoryDesc')}</p>
               </div>
 
               <div className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                <h3 className="font-medium mb-1">Processing orders and payments</h3>
-                <p className="text-sm text-gray-600">Handle orders from confirmation to delivery</p>
+                <h3 className="font-medium mb-1">{t('help.orderProcessing')}</h3>
+                <p className="text-sm text-gray-600">{t('help.orderProcessingDesc')}</p>
               </div>
 
               <div className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                <h3 className="font-medium mb-1">Understanding analytics and reports</h3>
-                <p className="text-sm text-gray-600">Make data-driven decisions with insights</p>
+                <h3 className="font-medium mb-1">{t('help.analyticsReports')}</h3>
+                <p className="text-sm text-gray-600">{t('help.analyticsDesc')}</p>
               </div>
             </CardContent>
           </Card>
@@ -145,30 +148,30 @@ export default function HelpPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>System Status</CardTitle>
-            <CardDescription>Current status of OishiMenu services</CardDescription>
+            <CardTitle>{t('help.systemStatus')}</CardTitle>
+            <CardDescription>{t('help.systemStatusDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-sm">API Services</span>
+                <span className="text-sm">{t('help.apiServices')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-sm">Database</span>
+                <span className="text-sm">{t('help.database')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-sm">Payment Processing</span>
+                <span className="text-sm">{t('help.paymentProcessing')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-sm">Notifications</span>
+                <span className="text-sm">{t('help.notifications')}</span>
               </div>
             </div>
             <p className="text-sm text-gray-600 mt-4">
-              All systems operational. Last checked: {new Date().toLocaleTimeString()}
+{t('help.allOperational')} {new Date().toLocaleTimeString()}
             </p>
           </CardContent>
         </Card>

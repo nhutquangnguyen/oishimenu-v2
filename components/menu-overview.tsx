@@ -61,21 +61,18 @@ export function MenuOverview() {
       setLoading(true)
       setError(null)
 
-      // TODO: Temporarily using static data to fix page accessibility issue
-      // Restore Firebase calls after investigating infinite loop issue
-      const staticCategories = [
-        { id: '1', name: 'Coffee', displayOrder: 1, isVisible: true, isActive: true, createdAt: new Date(), updatedAt: new Date() },
-        { id: '2', name: 'Tea', displayOrder: 2, isVisible: true, isActive: true, createdAt: new Date(), updatedAt: new Date() },
-        { id: '3', name: 'Pastries', displayOrder: 3, isVisible: true, isActive: true, createdAt: new Date(), updatedAt: new Date() }
-      ]
+      // Load real data from Firebase (same as POS component)
+      const [firebaseCategories, firebaseItems] = await Promise.all([
+        getMenuCategories(),
+        getMenuItems({
+          sortBy: 'name',
+          sortOrder: 'asc'
+        })
+      ])
 
-      const staticItems = [
-        { id: '1', name: 'Matcha Latte', price: 45000, categoryName: 'Coffee', availableStatus: 'AVAILABLE' as const, image: '', description: 'Premium matcha latte', photos: [], optionGroups: [], createdAt: new Date(), updatedAt: new Date() },
-        { id: '2', name: 'Cappuccino', price: 35000, categoryName: 'Coffee', availableStatus: 'AVAILABLE' as const, image: '', description: 'Classic cappuccino', photos: [], optionGroups: [], createdAt: new Date(), updatedAt: new Date() },
-        { id: '3', name: 'Green Tea', price: 25000, categoryName: 'Tea', availableStatus: 'AVAILABLE' as const, image: '', description: 'Fresh green tea', photos: [], optionGroups: [], createdAt: new Date(), updatedAt: new Date() }
-      ]
+      console.log('MenuOverview loaded:', firebaseItems.length, 'items')
 
-      const displayCategories = transformToDisplayFormat(staticCategories, staticItems)
+      const displayCategories = transformToDisplayFormat(firebaseCategories, firebaseItems)
       setCategories(displayCategories)
 
     } catch (err) {

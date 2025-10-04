@@ -16,6 +16,7 @@ import {
   Loader2,
   Reply
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { getFeedback, respondToFeedback, updateFeedbackStatus } from "@/lib/services/feedback"
 import type { Feedback } from "@/lib/types/feedback"
 

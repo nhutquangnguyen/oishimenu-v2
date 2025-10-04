@@ -5,12 +5,13 @@ import { ConditionalAuthProvider } from "@/components/conditional-auth-provider"
 import { ErrorNotificationProvider } from "@/components/error-notification"
 import { DebugPanel } from "@/components/debug-panel"
 import { QueryProvider } from "@/components/providers/query-provider"
+import { I18nProvider } from "@/components/i18n-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "OishiMenu - Giải pháp quản lý nhà hàng thông minh",
-  description: "Hệ thống quản lý toàn diện dành cho các nhà hàng SME tại Việt Nam",
+  title: "OishiMenu - Smart Restaurant Management Solution",
+  description: "Comprehensive management system for SME restaurants",
 }
 
 export const viewport = {
@@ -25,16 +26,18 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="vi">
+    <html lang="en">
       <body className={inter.className}>
-        <QueryProvider>
-          <ErrorNotificationProvider>
-            <ConditionalAuthProvider>
-              {children}
-            </ConditionalAuthProvider>
-            <DebugPanel />
-          </ErrorNotificationProvider>
-        </QueryProvider>
+        <I18nProvider>
+          <QueryProvider>
+            <ErrorNotificationProvider>
+              <ConditionalAuthProvider>
+                {children}
+              </ConditionalAuthProvider>
+              <DebugPanel />
+            </ErrorNotificationProvider>
+          </QueryProvider>
+        </I18nProvider>
       </body>
     </html>
   )

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Sidebar } from "./sidebar"
 import { ProtectedRoute } from "./protected-route"
+import { LanguageSwitcher } from "./language-switcher"
 import { Menu, X } from "lucide-react"
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -30,6 +31,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
         {/* Main content */}
         <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Desktop header */}
+          <header className="hidden lg:block bg-white border-b border-gray-200 px-6 py-3">
+            <div className="flex items-center justify-end">
+              <LanguageSwitcher />
+            </div>
+          </header>
+
           {/* Mobile header */}
           <header className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
             <button
@@ -46,7 +54,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 OishiMenu
               </span>
             </div>
-            <div className="w-10"></div> {/* Spacer for center alignment */}
+            <LanguageSwitcher />
           </header>
 
           {/* Page content */}

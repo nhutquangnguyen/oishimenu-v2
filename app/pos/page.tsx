@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { POSMenuGrid } from "@/components/pos-menu-grid"
 import { POSOrderSummaryV3 } from "@/components/pos-order-summary-v3"
@@ -20,6 +21,7 @@ export interface OrderItem {
 }
 
 export default function POSPage() {
+  const { t } = useTranslation()
   const [orderItems, setOrderItems] = useState<OrderItem[]>([])
 
   const handleAddItem = (item: Omit<OrderItem, "quantity">) => {
@@ -65,7 +67,7 @@ export default function POSPage() {
 
       const orderData = {
         customer: {
-          name: orderDetails.customer?.name || 'Walk-in Customer',
+          name: orderDetails.customer?.name || t('pos.walkInCustomer'),
           phone: orderDetails.customer?.phone || '',
           email: orderDetails.customer?.email || ''
         },

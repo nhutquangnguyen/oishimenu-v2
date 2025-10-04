@@ -4,6 +4,8 @@ import { useState } from "react"
 import { useAuth } from "@/components/auth-provider"
 import Link from "next/link"
 import { Menu, AlertCircle, Eye, EyeOff } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import { LanguageSwitcher } from "@/components/language-switcher"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -13,6 +15,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [resetEmailSent, setResetEmailSent] = useState(false)
   const { signInWithGoogle, signInWithEmail, resetPassword } = useAuth()
+  const { t } = useTranslation()
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,7 +46,7 @@ export default function LoginPage() {
 
   const handlePasswordReset = async () => {
     if (!email) {
-      setError("Vui lòng nhập email để đặt lại mật khẩu")
+      setError(t("auth.login.resetEmailPrompt"))
       return
     }
 
@@ -58,6 +61,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
+      {/* Language Switcher */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSwitcher />
+      </div>
+
       {/* Left Panel - Login Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
@@ -72,10 +80,10 @@ export default function LoginPage() {
               </span>
             </div>
             <h2 className="text-3xl font-extrabold text-gray-900">
-              Chào mừng trở lại
+              {t("auth.login.title")}
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Đăng nhập để truy cập bảng điều khiển quản lý nhà hàng
+              {t("auth.login.subtitle")}
             </p>
           </div>
 
@@ -92,30 +100,17 @@ export default function LoginPage() {
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-green-500 mt-0.5" />
               <div className="text-sm text-green-800">
-                Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư của bạn.
+                {t("auth.login.resetEmailSent")}
               </div>
             </div>
           )}
 
-          {/* Development Mode Notice */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-              <div className="text-sm text-yellow-800">
-                <strong>Development Mode:</strong> If Google authentication fails, check:
-                <ul className="mt-2 list-disc list-inside space-y-1">
-                  <li>Firebase project configuration</li>
-                  <li>Authorized domains in Firebase console (add localhost:3001)</li>
-                  <li>Google OAuth client setup</li>
-                </ul>
-              </div>
-            </div>
-          )}
 
           {/* Email/Password Form */}
           <form onSubmit={handleEmailSignIn} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
+                {t("common.email")}
               </label>
               <input
                 id="email"
@@ -126,13 +121,13 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Nhập email của bạn"
+                placeholder={t("auth.login.emailPlaceholder")}
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Mật khẩu
+                {t("common.password")}
               </label>
               <div className="relative">
                 <input
@@ -144,7 +139,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="Nhập mật khẩu của bạn"
+                  placeholder={t("auth.login.passwordPlaceholder")}
                 />
                 <button
                   type="button"
@@ -167,7 +162,7 @@ export default function LoginPage() {
                   onClick={handlePasswordReset}
                   className="font-medium text-purple-600 hover:text-purple-500"
                 >
-                  Quên mật khẩu?
+                  {t("auth.login.forgotPassword")}
                 </button>
               </div>
             </div>
@@ -178,7 +173,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
-                {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+                {loading ? t("auth.login.signingIn") : t("auth.login.signInButton")}
               </button>
             </div>
           </form>
@@ -189,7 +184,7 @@ export default function LoginPage() {
               <div className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Hoặc</span>
+              <span className="px-2 bg-white text-gray-500">{t("auth.login.orDivider")}</span>
             </div>
           </div>
 
@@ -219,16 +214,16 @@ export default function LoginPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Tiếp tục với Google
+{t("auth.login.googleButton")}
             </button>
           </div>
 
           {/* Sign up link */}
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Chưa có tài khoản?{" "}
+              {t("auth.login.noAccount")}{" "}
               <Link href="/signup" className="font-medium text-purple-600 hover:text-purple-500">
-                Đăng ký ngay
+                {t("auth.login.signUpLink")}
               </Link>
             </p>
           </div>
@@ -242,27 +237,27 @@ export default function LoginPage() {
           <div className="absolute inset-0 flex items-center justify-center p-12">
             <div className="text-white text-center max-w-lg">
               <h3 className="text-4xl font-bold mb-6">
-                Quản lý nhà hàng hiệu quả
+                {t("auth.login.rightPanel.title")}
               </h3>
               <p className="text-xl mb-8 opacity-90">
-                Truy cập các công cụ mạnh mẽ để theo dõi đơn hàng, quản lý kho, phân tích doanh số và phát triển kinh doanh
+                {t("auth.login.rightPanel.subtitle")}
               </p>
               <div className="grid grid-cols-2 gap-6 text-left">
                 <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4">
                   <div className="text-2xl font-bold">5,000+</div>
-                  <div className="text-sm opacity-90">Nhà hàng đang sử dụng</div>
+                  <div className="text-sm opacity-90">{t("auth.login.rightPanel.stat1")}</div>
                 </div>
                 <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4">
                   <div className="text-2xl font-bold">1M+</div>
-                  <div className="text-sm opacity-90">Đơn hàng đã xử lý</div>
+                  <div className="text-sm opacity-90">{t("auth.login.rightPanel.stat2")}</div>
                 </div>
                 <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4">
                   <div className="text-2xl font-bold">99.9%</div>
-                  <div className="text-sm opacity-90">Thời gian hoạt động</div>
+                  <div className="text-sm opacity-90">{t("auth.login.rightPanel.stat3")}</div>
                 </div>
                 <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4">
                   <div className="text-2xl font-bold">24/7</div>
-                  <div className="text-sm opacity-90">Hỗ trợ khách hàng</div>
+                  <div className="text-sm opacity-90">{t("auth.login.rightPanel.stat4")}</div>
                 </div>
               </div>
             </div>

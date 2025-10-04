@@ -25,21 +25,23 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { CalendarDays, Info, HelpCircle } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 export default function InsightsPage() {
+  const { t } = useTranslation()
   return (
     <DashboardLayout>
       <div className="p-6">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Insights</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('insights.title')}</h1>
           <div className="flex items-center gap-3">
             <button className="flex items-center gap-2 rounded-lg border border-orange-500 bg-orange-50 px-4 py-2 text-sm font-medium text-orange-600">
               <Info className="h-4 w-4" />
-              2 Data Exclusion(s)
+              {t('insights.dataExclusions', { count: 2 })}
             </button>
             <button className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
               <HelpCircle className="h-4 w-4" />
-              Help & Support
+              {t('insights.helpSupport')}
             </button>
           </div>
         </div>
@@ -50,31 +52,31 @@ export default function InsightsPage() {
               value="sales"
               className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
-              Sales
+              {t('insights.tabs.sales')}
             </TabsTrigger>
             <TabsTrigger
               value="menu"
               className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
-              Menu
+              {t('insights.tabs.menu')}
             </TabsTrigger>
             <TabsTrigger
               value="customers"
               className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
-              Customers
+              {t('insights.tabs.customers')}
             </TabsTrigger>
             <TabsTrigger
               value="operations"
               className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
-              Operations
+              {t('insights.tabs.operations')}
             </TabsTrigger>
             <TabsTrigger
               value="offers"
               className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-0 text-sm font-medium text-gray-600 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:shadow-none"
             >
-              Offers
+              {t('insights.tabs.offers')}
             </TabsTrigger>
           </TabsList>
 
@@ -89,23 +91,23 @@ export default function InsightsPage() {
 
               <Select defaultValue="all">
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select service" />
+                  <SelectValue placeholder={t('insights.filters.selectService')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All OishiMenu services</SelectItem>
-                  <SelectItem value="food">OishiDelivery</SelectItem>
-                  <SelectItem value="mart">OishiMart</SelectItem>
+                  <SelectItem value="all">{t('insights.filters.allServices')}</SelectItem>
+                  <SelectItem value="food">{t('insights.filters.oishiDelivery')}</SelectItem>
+                  <SelectItem value="mart">{t('insights.filters.oishiMart')}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select defaultValue="all-stores">
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select store" />
+                  <SelectValue placeholder={t('insights.filters.selectStore')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-stores">All stores</SelectItem>
-                  <SelectItem value="store1">Store 1</SelectItem>
-                  <SelectItem value="store2">Store 2</SelectItem>
+                  <SelectItem value="all-stores">{t('insights.filters.allStores')}</SelectItem>
+                  <SelectItem value="store1">{t('insights.filters.store1')}</SelectItem>
+                  <SelectItem value="store2">{t('insights.filters.store2')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -128,23 +130,23 @@ export default function InsightsPage() {
 
               <Select defaultValue="all">
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select service" />
+                  <SelectValue placeholder={t('insights.filters.selectService')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All OishiMenu services</SelectItem>
-                  <SelectItem value="food">OishiDelivery</SelectItem>
-                  <SelectItem value="mart">OishiMart</SelectItem>
+                  <SelectItem value="all">{t('insights.filters.allServices')}</SelectItem>
+                  <SelectItem value="food">{t('insights.filters.oishiDelivery')}</SelectItem>
+                  <SelectItem value="mart">{t('insights.filters.oishiMart')}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select defaultValue="all-stores">
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select store" />
+                  <SelectValue placeholder={t('insights.filters.selectStore')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-stores">All stores</SelectItem>
-                  <SelectItem value="store1">Dinh Barista - Coffee & Tea</SelectItem>
-                  <SelectItem value="store2">Dinh Barista - Coffee & Tea - 46A Đường số 22</SelectItem>
+                  <SelectItem value="all-stores">{t('insights.filters.allStores')}</SelectItem>
+                  <SelectItem value="store1">{t('insights.filters.store1')}</SelectItem>
+                  <SelectItem value="store2">{t('insights.filters.store2')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -165,23 +167,23 @@ export default function InsightsPage() {
 
               <Select defaultValue="all">
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select service" />
+                  <SelectValue placeholder={t('insights.filters.selectService')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All OishiMenu services</SelectItem>
-                  <SelectItem value="food">OishiDelivery</SelectItem>
-                  <SelectItem value="mart">OishiMart</SelectItem>
+                  <SelectItem value="all">{t('insights.filters.allServices')}</SelectItem>
+                  <SelectItem value="food">{t('insights.filters.oishiDelivery')}</SelectItem>
+                  <SelectItem value="mart">{t('insights.filters.oishiMart')}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select defaultValue="all-stores">
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select store" />
+                  <SelectValue placeholder={t('insights.filters.selectStore')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-stores">All stores</SelectItem>
-                  <SelectItem value="store1">Dinh Barista - Coffee & Tea</SelectItem>
-                  <SelectItem value="store2">Dinh Barista - Coffee & Tea - 46A Đường số 22</SelectItem>
+                  <SelectItem value="all-stores">{t('insights.filters.allStores')}</SelectItem>
+                  <SelectItem value="store1">{t('insights.filters.store1')}</SelectItem>
+                  <SelectItem value="store2">{t('insights.filters.store2')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -204,23 +206,23 @@ export default function InsightsPage() {
 
               <Select defaultValue="all">
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select service" />
+                  <SelectValue placeholder={t('insights.filters.selectService')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All OishiMenu services</SelectItem>
-                  <SelectItem value="food">OishiDelivery</SelectItem>
-                  <SelectItem value="mart">OishiMart</SelectItem>
+                  <SelectItem value="all">{t('insights.filters.allServices')}</SelectItem>
+                  <SelectItem value="food">{t('insights.filters.oishiDelivery')}</SelectItem>
+                  <SelectItem value="mart">{t('insights.filters.oishiMart')}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select defaultValue="all-stores">
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select store" />
+                  <SelectValue placeholder={t('insights.filters.selectStore')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-stores">All stores</SelectItem>
-                  <SelectItem value="store1">Dinh Barista - Coffee & Tea</SelectItem>
-                  <SelectItem value="store2">Dinh Barista - Coffee & Tea - 46A Đường số 22</SelectItem>
+                  <SelectItem value="all-stores">{t('insights.filters.allStores')}</SelectItem>
+                  <SelectItem value="store1">{t('insights.filters.store1')}</SelectItem>
+                  <SelectItem value="store2">{t('insights.filters.store2')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -243,46 +245,46 @@ export default function InsightsPage() {
 
               <Select defaultValue="all">
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select service" />
+                  <SelectValue placeholder={t('insights.filters.selectService')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All OishiMenu services</SelectItem>
-                  <SelectItem value="food">OishiDelivery</SelectItem>
-                  <SelectItem value="mart">OishiMart</SelectItem>
+                  <SelectItem value="all">{t('insights.filters.allServices')}</SelectItem>
+                  <SelectItem value="food">{t('insights.filters.oishiDelivery')}</SelectItem>
+                  <SelectItem value="mart">{t('insights.filters.oishiMart')}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select defaultValue="all-stores">
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select store" />
+                  <SelectValue placeholder={t('insights.filters.selectStore')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-stores">All stores</SelectItem>
-                  <SelectItem value="store1">Dinh Barista - Coffee & Tea</SelectItem>
-                  <SelectItem value="store2">Dinh Barista - Coffee & Tea - 46A Đường số 22</SelectItem>
+                  <SelectItem value="all-stores">{t('insights.filters.allStores')}</SelectItem>
+                  <SelectItem value="store1">{t('insights.filters.store1')}</SelectItem>
+                  <SelectItem value="store2">{t('insights.filters.store2')}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select defaultValue="all-offer-types">
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="All offer types" />
+                  <SelectValue placeholder={t('insights.filters.allOfferTypes')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-offer-types">All offer types</SelectItem>
-                  <SelectItem value="discount">Discount offers</SelectItem>
-                  <SelectItem value="free-item">Free item offers</SelectItem>
-                  <SelectItem value="delivery">Delivery offers</SelectItem>
+                  <SelectItem value="all-offer-types">{t('insights.filters.allOfferTypes')}</SelectItem>
+                  <SelectItem value="discount">{t('insights.filters.discountOffers')}</SelectItem>
+                  <SelectItem value="free-item">{t('insights.filters.freeItemOffers')}</SelectItem>
+                  <SelectItem value="delivery">{t('insights.filters.deliveryOffers')}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select defaultValue="all-offers">
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="All offers" />
+                  <SelectValue placeholder={t('insights.filters.allOffers')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-offers">All offers</SelectItem>
-                  <SelectItem value="active">Active offers</SelectItem>
-                  <SelectItem value="ended">Ended offers</SelectItem>
+                  <SelectItem value="all-offers">{t('insights.filters.allOffers')}</SelectItem>
+                  <SelectItem value="active">{t('insights.filters.activeOffers')}</SelectItem>
+                  <SelectItem value="ended">{t('insights.filters.endedOffers')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

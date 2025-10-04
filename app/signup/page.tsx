@@ -4,6 +4,8 @@ import { useState } from "react"
 import { useAuth } from "@/components/auth-provider"
 import Link from "next/link"
 import { Menu, AlertCircle, CheckCircle, Eye, EyeOff } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import { LanguageSwitcher } from "@/components/language-switcher"
 
 export default function SignupPage() {
   const [name, setName] = useState("")
@@ -15,6 +17,7 @@ export default function SignupPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const { signInWithGoogle, signUpWithEmail } = useAuth()
+  const { t } = useTranslation()
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,12 +25,12 @@ export default function SignupPage() {
 
     // Validation
     if (password !== confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp")
+      setError(t("auth.signup.passwordMismatch"))
       return
     }
 
     if (password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự")
+      setError(t("auth.signup.passwordTooShort"))
       return
     }
 
@@ -57,6 +60,11 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex">
+      {/* Language Switcher */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSwitcher />
+      </div>
+
       {/* Left Panel - Signup Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
@@ -71,10 +79,10 @@ export default function SignupPage() {
               </span>
             </div>
             <h2 className="text-3xl font-extrabold text-gray-900">
-              Bắt đầu miễn phí
+              {t("auth.signup.title")}
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Tạo tài khoản để quản lý nhà hàng của bạn
+              {t("auth.signup.subtitle")}
             </p>
           </div>
 
@@ -88,23 +96,23 @@ export default function SignupPage() {
 
           {/* Benefits */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
-            <h3 className="font-semibold text-green-800 text-sm">Miễn phí 30 ngày đầu:</h3>
+            <h3 className="font-semibold text-green-800 text-sm">{t("auth.signup.freeTrial")}</h3>
             <ul className="space-y-2 text-sm text-green-700">
               <li className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-600" />
-                <span>Quản lý đơn hàng không giới hạn</span>
+                <span>{t("auth.signup.benefit1")}</span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-600" />
-                <span>Tích hợp OishiDelivery, Shopee Food</span>
+                <span>{t("auth.signup.benefit2")}</span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-600" />
-                <span>Báo cáo doanh thu chi tiết</span>
+                <span>{t("auth.signup.benefit3")}</span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-600" />
-                <span>Hỗ trợ khách hàng 24/7</span>
+                <span>{t("auth.signup.benefit4")}</span>
               </li>
             </ul>
           </div>
@@ -113,7 +121,7 @@ export default function SignupPage() {
           <form onSubmit={handleEmailSignUp} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Họ và tên
+                {t("auth.signup.nameLabel")}
               </label>
               <input
                 id="name"
@@ -124,13 +132,13 @@ export default function SignupPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Nhập họ và tên của bạn"
+                placeholder={t("auth.signup.namePlaceholder")}
               />
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
+                {t("common.email")}
               </label>
               <input
                 id="email"
@@ -141,13 +149,13 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Nhập email của bạn"
+                placeholder={t("auth.signup.emailPlaceholder")}
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Mật khẩu
+                {t("common.password")}
               </label>
               <div className="relative">
                 <input
@@ -159,7 +167,7 @@ export default function SignupPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="Tạo mật khẩu (tối thiểu 6 ký tự)"
+                  placeholder={t("auth.signup.passwordPlaceholder")}
                 />
                 <button
                   type="button"
@@ -177,7 +185,7 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Xác nhận mật khẩu
+                {t("auth.signup.confirmPasswordLabel")}
               </label>
               <div className="relative">
                 <input
@@ -189,7 +197,7 @@ export default function SignupPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="Nhập lại mật khẩu"
+                  placeholder={t("auth.signup.confirmPasswordPlaceholder")}
                 />
                 <button
                   type="button"
@@ -211,7 +219,7 @@ export default function SignupPage() {
                 disabled={loading}
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
-                {loading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
+                {loading ? t("auth.signup.signingUp") : t("auth.signup.signUpButton")}
               </button>
             </div>
           </form>
@@ -222,7 +230,7 @@ export default function SignupPage() {
               <div className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Hoặc</span>
+              <span className="px-2 bg-white text-gray-500">{t("auth.login.orDivider")}</span>
             </div>
           </div>
 
@@ -252,28 +260,28 @@ export default function SignupPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Đăng ký với Google
+{t("auth.signup.googleButton")}
             </button>
           </div>
 
           {/* Sign in link and terms */}
           <div className="text-center space-y-4">
             <p className="text-sm text-gray-600">
-              Đã có tài khoản?{" "}
+              {t("auth.signup.hasAccount")}{" "}
               <Link href="/login" className="font-medium text-purple-600 hover:text-purple-500">
-                Đăng nhập
+                {t("auth.signup.signInLink")}
               </Link>
             </p>
 
             <div className="text-xs text-gray-500 space-y-2">
               <p>
-                Bằng cách đăng ký, bạn đồng ý với{" "}
+                {t("auth.signup.termsText")}{" "}
                 <a href="#" className="text-purple-600 hover:text-purple-500 underline">
-                  Điều khoản sử dụng
+                  {t("auth.signup.termsLink")}
                 </a>
-                {" "}và{" "}
+                {" "}{t("common.and")}{" "}
                 <a href="#" className="text-purple-600 hover:text-purple-500 underline">
-                  Chính sách bảo mật
+                  {t("auth.signup.privacyLink")}
                 </a>
               </p>
             </div>
@@ -288,10 +296,10 @@ export default function SignupPage() {
           <div className="absolute inset-0 flex items-center justify-center p-12">
             <div className="text-white text-center max-w-lg">
               <h3 className="text-4xl font-bold mb-6">
-                Tham gia cùng 5,000+ nhà hàng
+                {t("auth.signup.rightPanel.title")}
               </h3>
               <p className="text-xl mb-8 opacity-90">
-                Các chủ nhà hàng đang sử dụng OishiMenu để tăng doanh thu và tối ưu vận hành
+                {t("auth.signup.rightPanel.subtitle")}
               </p>
               <div className="grid grid-cols-1 gap-6 text-left">
                 <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-6">
@@ -300,12 +308,12 @@ export default function SignupPage() {
                       <span className="text-lg font-bold">LM</span>
                     </div>
                     <div>
-                      <div className="font-semibold">Lê Minh</div>
-                      <div className="text-sm opacity-75">Cà phê Sài Gòn</div>
+                      <div className="font-semibold">{t("auth.signup.rightPanel.testimonial1.name")}</div>
+                      <div className="text-sm opacity-75">{t("auth.signup.rightPanel.testimonial1.business")}</div>
                     </div>
                   </div>
                   <p className="text-sm italic">
-                    "Doanh thu tăng 40% sau 3 tháng sử dụng OishiMenu. Quản lý đơn hàng từ các app giờ rất đơn giản!"
+                    "{t("auth.signup.rightPanel.testimonial1.quote")}"
                   </p>
                 </div>
                 <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-6">
@@ -314,12 +322,12 @@ export default function SignupPage() {
                       <span className="text-lg font-bold">TH</span>
                     </div>
                     <div>
-                      <div className="font-semibold">Trần Hằng</div>
-                      <div className="text-sm opacity-75">Phở Hà Nội</div>
+                      <div className="font-semibold">{t("auth.signup.rightPanel.testimonial2.name")}</div>
+                      <div className="text-sm opacity-75">{t("auth.signup.rightPanel.testimonial2.business")}</div>
                     </div>
                   </div>
                   <p className="text-sm italic">
-                    "Báo cáo doanh thu real-time cực kỳ hữu ích. Giờ tôi quản lý 3 cửa hàng dễ dàng hơn nhiều!"
+                    "{t("auth.signup.rightPanel.testimonial2.quote")}"
                   </p>
                 </div>
               </div>
