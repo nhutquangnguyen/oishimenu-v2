@@ -292,6 +292,7 @@ function TableCard({ table, onStatusChange, onEdit, onDelete, getStatusColor, ge
   getStatusColor: (status: TableStatus) => string
   getStatusIcon: (status: TableStatus) => React.ReactNode
 }) {
+  const { t } = useTranslation()
   const [showDropdown, setShowDropdown] = useState(false)
 
   return (
@@ -380,6 +381,7 @@ function CreateTableModal({ onClose, onSuccess }: {
   onClose: () => void
   onSuccess: () => void
 }) {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState<CreateTableData>({
     name: '',
     seats: 2,
@@ -497,6 +499,7 @@ function EditTableModal({ table, onClose, onSuccess }: {
   onClose: () => void
   onSuccess: () => void
 }) {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState<UpdateTableData>({
     name: table.name,
     seats: table.seats,
